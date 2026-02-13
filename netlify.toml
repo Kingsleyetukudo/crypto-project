@@ -5,7 +5,7 @@
 
 [[redirects]]
   from = "/api/*"
-  to = "https://crypto-platform-api-ccm1.onrender.com"
+  to = "https://crypto-platform-api-ccm1.onrender.com/api/:splat"
   status = 200
   force = true
 
