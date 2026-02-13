@@ -13,6 +13,8 @@ import {
   Search,
   Activity,
   LogOut,
+  Menu,
+  X,
 } from "lucide-react";
 import api from "../api/axios.js";
 import profileAvatar from "../assets/profile-avatar.png";
@@ -48,6 +50,7 @@ export default function UserLayout({ children }) {
   const navigate = useNavigate();
   const [profileName, setProfileName] = React.useState("");
   const [walletAddress, setWalletAddress] = React.useState("");
+  const [mobileSidebarOpen, setMobileSidebarOpen] = React.useState(false);
 
   const pageTitle = React.useMemo(() => {
     const active = navItems.find((item) => item.to === location.pathname);
@@ -88,6 +91,10 @@ export default function UserLayout({ children }) {
     };
   }, [location.pathname]);
 
+  React.useEffect(() => {
+    setMobileSidebarOpen(false);
+  }, [location.pathname]);
+
   const walletLabel = walletAddress
     ? `${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}`
     : "No wallet address";
@@ -100,6 +107,83 @@ export default function UserLayout({ children }) {
   return (
     <div className="min-h-screen bg-[#0b0c0d] text-white">
       <div className="flex min-h-screen">
+        {mobileSidebarOpen && (
+          <div className="fixed inset-0 z-40 lg:hidden">
+            <button
+              type="button"
+              aria-label="Close sidebar"
+              onClick={() => setMobileSidebarOpen(false)}
+              className="absolute inset-0 bg-black/60"
+            />
+            <aside className="absolute left-0 top-0 flex h-full w-72 flex-col border-r border-white/10 bg-gradient-to-b from-[#101214] via-[#0b0c0d] to-[#0b0c0d] px-6 py-8">
+              <div className="flex items-center justify-between">
+                <Link
+                  to="/"
+                  className="flex items-center gap-3 text-xl font-semibold"
+                >
+                  <span className="grid h-9 w-9 place-items-center rounded-full bg-emerald-400/15">
+                    <span className="h-4 w-4 rounded-full border-2 border-emerald-300" />
+                  </span>
+                  Cryptos
+                </Link>
+                <button
+                  type="button"
+                  aria-label="Close sidebar"
+                  onClick={() => setMobileSidebarOpen(false)}
+                  className="rounded-lg border border-white/10 p-2 text-slate-300 hover:text-white"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+              <nav className="sidebar-scrollbar mt-10 flex flex-1 flex-col gap-2 overflow-y-auto pr-2">
+                {navItems.map((item) => {
+                  const Icon = item.icon;
+                  return (
+                    <NavLink
+                      key={item.to}
+                      to={item.to}
+                      onClick={() => setMobileSidebarOpen(false)}
+                      className={({ isActive }) =>
+                        `group flex items-center gap-3 rounded-xl px-4 py-3 text-sm transition ${
+                          isActive
+                            ? "bg-emerald-400 text-slate-950 shadow-[0_0_0_1px_rgba(52,211,153,0.4)]"
+                            : "text-slate-400 hover:bg-white/5 hover:text-white"
+                        }`
+                      }
+                    >
+                      <Icon className="h-4 w-4" />
+                      {item.label}
+                    </NavLink>
+                  );
+                })}
+              </nav>
+              <div className="mt-8 space-y-2 border-t border-white/10 pt-6">
+                {bottomItems.map((item) => {
+                  const Icon = item.icon;
+                  return (
+                    <NavLink
+                      key={item.to}
+                      to={item.to}
+                      onClick={() => setMobileSidebarOpen(false)}
+                      className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm text-slate-400 hover:bg-white/5 hover:text-white"
+                    >
+                      <Icon className="h-4 w-4" />
+                      {item.label}
+                    </NavLink>
+                  );
+                })}
+                <button
+                  onClick={handleLogout}
+                  className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm text-slate-400 hover:bg-white/5 hover:text-white"
+                >
+                  <LogOut className="h-4 w-4" />
+                  Logout
+                </button>
+              </div>
+            </aside>
+          </div>
+        )}
+
         <aside className="sticky top-0 hidden h-screen w-72 flex-col border-r border-white/10 bg-gradient-to-b from-[#101214] via-[#0b0c0d] to-[#0b0c0d] px-6 py-8 lg:flex">
           <Link
             to="/"
@@ -157,7 +241,17 @@ export default function UserLayout({ children }) {
 
         <div className="flex flex-1 flex-col">
           <header className="sticky top-0 z-10 flex items-center justify-between gap-6 border-b border-white/10 bg-[#0b0c0d]/90 px-6 py-4 backdrop-blur">
-            <h1 className="text-2xl font-semibold">{pageTitle}</h1>
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                aria-label="Open sidebar"
+                onClick={() => setMobileSidebarOpen(true)}
+                className="rounded-lg border border-white/10 p-2 text-slate-300 hover:text-white lg:hidden"
+              >
+                <Menu className="h-5 w-5" />
+              </button>
+              <h1 className="text-2xl font-semibold">{pageTitle}</h1>
+            </div>
             <div className="flex flex-1 items-center justify-end gap-6">
               <div className="hidden w-full max-w-md items-center gap-3 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-slate-300 md:flex">
                 <Search className="h-4 w-4" />
