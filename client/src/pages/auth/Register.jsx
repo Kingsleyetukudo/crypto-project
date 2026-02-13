@@ -109,10 +109,10 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white">
-      <div className="mx-auto flex min-h-screen max-w-6xl items-center px-6 py-12">
+    <div className="min-h-screen overflow-x-hidden bg-slate-950 text-white">
+      <div className="mx-auto flex min-h-screen max-w-6xl items-center px-4 py-10 sm:px-6 sm:py-12">
         <div className="grid w-full gap-10 lg:grid-cols-[0.9fr_1.1fr]">
-          <div className="rounded-3xl border border-slate-800 bg-slate-900/70 p-8">
+          <div className="rounded-3xl border border-slate-800 bg-slate-900/70 p-6 sm:p-8">
             <h2 className="text-2xl font-semibold">Create your account</h2>
             <p className="mt-2 text-sm text-slate-400">
               Start investing with a secure crypto portfolio.
@@ -320,7 +320,7 @@ export default function Register() {
             <p className="text-xs uppercase tracking-[0.4em] text-cyan-400">
               Build Wealth
             </p>
-            <h1 className="text-4xl font-semibold leading-tight">
+            <h1 className="text-3xl font-semibold leading-tight sm:text-4xl">
               Start earning daily ROI with curated investment plans.
             </h1>
             <p className="text-sm text-slate-400">

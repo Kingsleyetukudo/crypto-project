@@ -40,14 +40,14 @@ export default function Login() {
     }
   };
   return (
-    <div className="min-h-screen bg-slate-950 text-white">
-      <div className="mx-auto flex min-h-screen max-w-6xl items-center px-6 py-12">
+    <div className="min-h-screen overflow-x-hidden bg-slate-950 text-white">
+      <div className="mx-auto flex min-h-screen max-w-6xl items-center px-4 py-10 sm:px-6 sm:py-12">
         <div className="grid w-full gap-10 lg:grid-cols-[1.1fr_0.9fr]">
           <div className="flex flex-col justify-center gap-6">
             <p className="text-xs uppercase tracking-[0.4em] text-emerald-400">
               Secure Access
             </p>
-            <h1 className="text-4xl font-semibold leading-tight">
+            <h1 className="text-3xl font-semibold leading-tight sm:text-4xl">
               Welcome back to your crypto command center.
             </h1>
             <p className="text-sm text-slate-400">
@@ -56,7 +56,7 @@ export default function Login() {
             </p>
           </div>
 
-          <div className="rounded-3xl border border-slate-800 bg-slate-900/70 p-8">
+          <div className="rounded-3xl border border-slate-800 bg-slate-900/70 p-6 sm:p-8">
             <h2 className="text-2xl font-semibold">Login</h2>
             <p className="mt-2 text-sm text-slate-400">
               Enter your credentials to continue.

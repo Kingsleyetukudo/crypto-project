@@ -105,8 +105,8 @@ export default function UserLayout({ children }) {
   };
 
   return (
-    <div className="min-h-screen bg-[#0b0c0d] text-white">
-      <div className="flex min-h-screen">
+    <div className="h-screen overflow-hidden bg-[#0b0c0d] text-white">
+      <div className="flex h-screen">
         {mobileSidebarOpen && (
           <div className="fixed inset-0 z-40 lg:hidden">
             <button
@@ -239,49 +239,74 @@ export default function UserLayout({ children }) {
           </div>
         </aside>
 
-        <div className="flex flex-1 flex-col">
-          <header className="sticky top-0 z-10 flex items-center justify-between gap-6 border-b border-white/10 bg-[#0b0c0d]/90 px-6 py-4 backdrop-blur">
-            <div className="flex items-center gap-3">
-              <button
-                type="button"
-                aria-label="Open sidebar"
-                onClick={() => setMobileSidebarOpen(true)}
-                className="rounded-lg border border-white/10 p-2 text-slate-300 hover:text-white lg:hidden"
-              >
-                <Menu className="h-5 w-5" />
-              </button>
-              <h1 className="text-2xl font-semibold">{pageTitle}</h1>
-            </div>
-            <div className="flex flex-1 items-center justify-end gap-6">
-              <div className="hidden w-full max-w-md items-center gap-3 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-slate-300 md:flex">
-                <Search className="h-4 w-4" />
-                <input
-                  placeholder="Search"
-                  className="w-full bg-transparent text-sm text-slate-200 placeholder:text-slate-500 focus:outline-none"
-                />
+        <div className="flex h-screen min-w-0 flex-1 flex-col overflow-hidden">
+          <header className="sticky top-0 z-10 border-b border-white/10 bg-[#0b0c0d]/90 px-4 py-4 backdrop-blur sm:px-6">
+            <div className="space-y-3 md:hidden">
+              <div className="flex items-center justify-between gap-3">
+                <button
+                  type="button"
+                  aria-label="Open sidebar"
+                  onClick={() => setMobileSidebarOpen(true)}
+                  className="rounded-lg border border-white/10 p-2 text-slate-300 hover:text-white"
+                >
+                  <Menu className="h-5 w-5" />
+                </button>
+                <div className="flex min-w-0 items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-2">
+                  <img
+                    src={profileAvatar}
+                    alt="Profile"
+                    className="h-8 w-8 rounded-full object-cover"
+                  />
+                  <div className="min-w-0 text-xs">
+                    <p className="truncate font-semibold text-white">
+                      {profileName || "User"}
+                    </p>
+                    <p className="truncate text-slate-500">{walletLabel}</p>
+                  </div>
+                </div>
               </div>
-              <button className="relative rounded-full border border-white/10 bg-white/5 p-2 text-slate-300 hover:text-white">
-                <Bell className="h-4 w-4" />
-                <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-rose-400" />
-              </button>
-              <div className="flex items-center gap-3 rounded-full border border-white/10 bg-white/5 px-3 py-2">
-                <img
-                  src={profileAvatar}
-                  alt="Profile"
-                  className="h-8 w-8 rounded-full object-cover"
-                />
-                <div className="text-xs">
-                  <p className="font-semibold text-white">
-                    {profileName || "User"}
-                  </p>
-                  <p className="text-slate-500">{walletLabel}</p>
+              <div className="flex items-center justify-between gap-3">
+                <h1 className="truncate text-xl font-semibold">{pageTitle}</h1>
+                <button className="relative rounded-full border border-white/10 bg-white/5 p-2 text-slate-300 hover:text-white">
+                  <Bell className="h-4 w-4" />
+                  <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-rose-400" />
+                </button>
+              </div>
+            </div>
+
+            <div className="hidden items-center justify-between gap-6 md:flex">
+              <h1 className="text-2xl font-semibold">{pageTitle}</h1>
+              <div className="flex flex-1 items-center justify-end gap-6">
+                <div className="flex w-full max-w-md items-center gap-3 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-slate-300">
+                  <Search className="h-4 w-4" />
+                  <input
+                    placeholder="Search"
+                    className="w-full bg-transparent text-sm text-slate-200 placeholder:text-slate-500 focus:outline-none"
+                  />
+                </div>
+                <button className="relative rounded-full border border-white/10 bg-white/5 p-2 text-slate-300 hover:text-white">
+                  <Bell className="h-4 w-4" />
+                  <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-rose-400" />
+                </button>
+                <div className="flex items-center gap-3 rounded-full border border-white/10 bg-white/5 px-3 py-2">
+                  <img
+                    src={profileAvatar}
+                    alt="Profile"
+                    className="h-8 w-8 rounded-full object-cover"
+                  />
+                  <div className="text-xs">
+                    <p className="font-semibold text-white">
+                      {profileName || "User"}
+                    </p>
+                    <p className="text-slate-500">{walletLabel}</p>
+                  </div>
                 </div>
               </div>
             </div>
           </header>
-          <main className="flex-1 px-6 py-8">{children}</main>
+          <main className="min-w-0 flex-1 overflow-y-auto overflow-x-hidden px-4 py-6 sm:px-6 sm:py-8">{children}</main>
 
-          <footer className="border-t border-white/10 px-6 py-4 text-xs text-slate-600">
+          <footer className="border-t border-white/10 px-4 py-4 text-xs text-slate-600 sm:px-6">
             (c) {new Date().getFullYear()} Cryptos. All rights reserved.
           </footer>
         </div>

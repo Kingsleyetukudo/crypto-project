@@ -29,7 +29,7 @@ export default function FloatingChatWidget() {
   return (
     <>
       {chatOpen && (
-        <div className="fixed bottom-24 right-6 z-50 w-[320px] overflow-hidden rounded-2xl border border-white/10 bg-[#101214] shadow-2xl">
+        <div className="fixed bottom-24 right-4 z-50 w-[calc(100vw-2rem)] max-w-[320px] overflow-hidden rounded-2xl border border-white/10 bg-[#101214] shadow-2xl sm:right-6">
           <div className="flex items-center justify-between border-b border-white/10 px-4 py-3">
             <p className="text-sm font-semibold text-white">Support Chat</p>
             <button
@@ -83,7 +83,7 @@ export default function FloatingChatWidget() {
       <button
         type="button"
         onClick={() => setChatOpen((prev) => !prev)}
-        className="fixed bottom-6 right-6 z-50 grid h-14 w-14 place-items-center rounded-full bg-emerald-400 text-slate-950 shadow-lg hover:bg-emerald-300"
+        className="fixed bottom-6 right-4 z-50 grid h-14 w-14 place-items-center rounded-full bg-emerald-400 text-slate-950 shadow-lg hover:bg-emerald-300 sm:right-6"
       >
         <MessageCircle className="h-6 w-6" />
       </button>

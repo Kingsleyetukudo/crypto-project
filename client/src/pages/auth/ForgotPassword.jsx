@@ -30,9 +30,9 @@ export default function ForgotPassword() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white">
-      <div className="mx-auto flex min-h-screen max-w-xl items-center px-6 py-12">
-        <div className="w-full rounded-3xl border border-slate-800 bg-slate-900/70 p-8">
+    <div className="min-h-screen overflow-x-hidden bg-slate-950 text-white">
+      <div className="mx-auto flex min-h-screen max-w-xl items-center px-4 py-10 sm:px-6 sm:py-12">
+        <div className="w-full rounded-3xl border border-slate-800 bg-slate-900/70 p-6 sm:p-8">
           <h2 className="text-2xl font-semibold">Forgot password</h2>
           <p className="mt-2 text-sm text-slate-400">
             Enter your email to receive a 6-digit OTP.
