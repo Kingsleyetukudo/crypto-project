@@ -65,7 +65,7 @@ export default function CryptoNews() {
                   href={article.url}
                   target="_blank"
                   rel="noreferrer"
-                  className="mt-4 inline-block text-sm text-emerald-300 hover:text-emerald-200"
+                  className="mt-4 inline-block text-sm text-amber-300 hover:text-amber-200"
                 >
                   Read more →
                 </a>
@@ -84,3 +84,4 @@ export default function CryptoNews() {
     </div>
   );
 }
+

@@ -136,7 +136,7 @@ export const updateAdminWallet = async (req, res) => {
     const wallet = await DepositWallet.findByIdAndUpdate(
       req.params.id,
       { isActive },
-      { new: true },
+      { returnDocument: "after" },
     );
     if (!wallet) {
       return res.status(404).json({ message: "Wallet not found" });
@@ -201,7 +201,7 @@ export const updateInvestmentPlan = async (req, res) => {
     Object.keys(update).forEach((key) => update[key] === undefined && delete update[key]);
 
     const plan = await InvestmentPlan.findByIdAndUpdate(req.params.id, update, {
-      new: true,
+      returnDocument: "after",
     });
     if (!plan) {
       return res.status(404).json({ message: "Plan not found" });
@@ -315,7 +315,7 @@ export const updateAdminInvestment = async (req, res) => {
     }
 
     const investment = await Investment.findByIdAndUpdate(req.params.id, update, {
-      new: true,
+      returnDocument: "after",
     });
     if (!investment) {
       return res.status(404).json({ message: "Investment not found" });

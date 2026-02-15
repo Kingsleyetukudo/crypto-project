@@ -140,12 +140,12 @@ export default function ResetPassword() {
             </div>
 
             {error && <p className="text-sm text-rose-400">{error}</p>}
-            {message && <p className="text-sm text-emerald-400">{message}</p>}
+            {message && <p className="text-sm text-amber-400">{message}</p>}
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full rounded-xl bg-emerald-500 px-4 py-3 text-sm font-semibold text-slate-950 hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-70"
+              className="w-full rounded-xl bg-amber-500 px-4 py-3 text-sm font-semibold text-slate-950 hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-70"
             >
               {loading ? "Resetting..." : "Reset Password"}
             </button>
@@ -153,8 +153,15 @@ export default function ResetPassword() {
 
           <p className="mt-6 text-sm text-slate-400">
             Back to{" "}
-            <Link to="/login" className="text-emerald-400 hover:text-emerald-300">
+            <Link to="/login" className="text-amber-400 hover:text-amber-300">
               Sign in
+            </Link>
+          </p>
+
+          <p className="mt-2 text-sm text-slate-400">
+            Back to{" "}
+            <Link to="/" className="text-amber-400 hover:text-amber-300">
+              Home
             </Link>
           </p>
         </div>
@@ -162,3 +169,4 @@ export default function ResetPassword() {
     </div>
   );
 }
+

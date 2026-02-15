@@ -48,7 +48,7 @@ export default function Referrals() {
           <span className="flex-1 truncate">{link}</span>
           <button
             onClick={handleCopy}
-            className="rounded-full border border-white/10 px-3 py-1 text-xs text-slate-300 hover:border-emerald-400 hover:text-emerald-200"
+            className="rounded-full border border-white/10 px-3 py-1 text-xs text-slate-300 hover:border-amber-400 hover:text-amber-200"
           >
             {copied ? "Copied" : "Copy"}
           </button>
@@ -67,3 +67,4 @@ export default function Referrals() {
     </div>
   );
 }
+

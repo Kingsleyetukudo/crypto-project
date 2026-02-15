@@ -195,7 +195,7 @@ export default function AdminDashboard() {
                           <button
                             onClick={() => handleAction(item.id, "completed")}
                             disabled={actionId === item.id}
-                            className="inline-flex items-center gap-2 rounded-full bg-emerald-500 px-4 py-2 text-xs font-semibold text-slate-950 hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-70"
+                            className="inline-flex items-center gap-2 rounded-full bg-amber-500 px-4 py-2 text-xs font-semibold text-slate-950 hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-70"
                           >
                             {actionId === item.id ? (
                               <Loader2 className="h-4 w-4 animate-spin" />
@@ -270,7 +270,7 @@ export default function AdminDashboard() {
               />
               <button
                 type="submit"
-                className="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-500 px-4 py-3 text-sm font-semibold text-slate-950 hover:bg-emerald-400 md:col-span-2"
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-amber-500 px-4 py-3 text-sm font-semibold text-slate-950 hover:bg-amber-400 md:col-span-2"
               >
                 <Plus className="h-4 w-4" />
                 Add Wallet
@@ -311,3 +311,4 @@ export default function AdminDashboard() {
     </div>
   );
 }
+

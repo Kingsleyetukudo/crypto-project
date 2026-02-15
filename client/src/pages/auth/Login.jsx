@@ -2,6 +2,7 @@ import React from "react";
 import { Eye, EyeOff, Lock, Mail } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import api from "../../api/axios.js";
+import Logo from "../../assets/Goldchain-logo.png";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -44,7 +45,8 @@ export default function Login() {
       <div className="mx-auto flex min-h-screen max-w-6xl items-center px-4 py-10 sm:px-6 sm:py-12">
         <div className="grid w-full gap-10 lg:grid-cols-[1.1fr_0.9fr]">
           <div className="flex flex-col justify-center gap-6">
-            <p className="text-xs uppercase tracking-[0.4em] text-emerald-400">
+            <img src={Logo} alt="Goldchain logo" className="w-28" />
+            <p className="text-xs uppercase tracking-[0.4em] text-amber-400">
               Secure Access
             </p>
             <h1 className="text-3xl font-semibold leading-tight sm:text-4xl">
@@ -111,7 +113,7 @@ export default function Login() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full rounded-xl bg-emerald-500 px-4 py-3 text-sm font-semibold text-slate-950 hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-70"
+                className="w-full rounded-xl bg-amber-500 px-4 py-3 text-sm font-semibold text-slate-950 hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-70"
               >
                 {loading ? "Signing in..." : "Sign In"}
               </button>
@@ -119,15 +121,22 @@ export default function Login() {
 
             <div className="mt-4 flex items-center justify-between text-xs text-slate-400">
               <span>Forgot password?</span>
-              <Link to="/forgot-password" className="text-emerald-400 hover:text-emerald-300">
+              <Link to="/forgot-password" className="text-amber-400 hover:text-amber-300">
                 Reset via OTP
               </Link>
             </div>
 
             <p className="mt-6 text-sm text-slate-400">
               New here?{" "}
-              <Link to="/register" className="text-emerald-400 hover:text-emerald-300">
+              <Link to="/register" className="text-amber-400 hover:text-amber-300">
                 Create an account
+              </Link>
+            </p>
+
+            <p className="mt-2 text-sm text-slate-400">
+              Back to{" "}
+              <Link to="/" className="text-amber-400 hover:text-amber-300">
+                Home
               </Link>
             </p>
           </div>
@@ -136,3 +145,4 @@ export default function Login() {
     </div>
   );
 }
+

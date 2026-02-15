@@ -232,12 +232,12 @@ export default function Settings() {
             </div>
 
             {profileError && <p className="text-sm text-rose-400">{profileError}</p>}
-            {profileMessage && <p className="text-sm text-emerald-400">{profileMessage}</p>}
+            {profileMessage && <p className="text-sm text-amber-400">{profileMessage}</p>}
 
             <button
               type="submit"
               disabled={savingProfile}
-              className="rounded-xl bg-emerald-400 px-4 py-3 text-sm font-semibold text-slate-950 hover:bg-emerald-300 disabled:cursor-not-allowed disabled:opacity-70"
+              className="rounded-xl bg-amber-400 px-4 py-3 text-sm font-semibold text-slate-950 hover:bg-amber-300 disabled:cursor-not-allowed disabled:opacity-70"
             >
               {savingProfile ? "Saving..." : "Save Changes"}
             </button>
@@ -306,14 +306,14 @@ export default function Settings() {
 
           {passwordError && <p className="text-sm text-rose-400">{passwordError}</p>}
           {passwordMessage && (
-            <p className="text-sm text-emerald-400">{passwordMessage}</p>
+            <p className="text-sm text-amber-400">{passwordMessage}</p>
           )}
 
           <button
             type="button"
             onClick={onRequestPasswordOtp}
             disabled={sendingPasswordOtp}
-            className="rounded-xl border border-white/10 px-4 py-3 text-sm font-semibold text-white hover:border-emerald-400 hover:text-emerald-300 disabled:cursor-not-allowed disabled:opacity-70"
+            className="rounded-xl border border-white/10 px-4 py-3 text-sm font-semibold text-white hover:border-amber-400 hover:text-amber-300 disabled:cursor-not-allowed disabled:opacity-70"
           >
             {sendingPasswordOtp ? "Sending OTP..." : "Send Password OTP"}
           </button>
@@ -321,7 +321,7 @@ export default function Settings() {
           <button
             type="submit"
             disabled={changingPassword}
-            className="rounded-xl bg-emerald-400 px-4 py-3 text-sm font-semibold text-slate-950 hover:bg-emerald-300 disabled:cursor-not-allowed disabled:opacity-70"
+            className="rounded-xl bg-amber-400 px-4 py-3 text-sm font-semibold text-slate-950 hover:bg-amber-300 disabled:cursor-not-allowed disabled:opacity-70"
           >
             {changingPassword ? "Updating..." : "Change Password"}
           </button>
@@ -330,3 +330,4 @@ export default function Settings() {
     </div>
   );
 }
+

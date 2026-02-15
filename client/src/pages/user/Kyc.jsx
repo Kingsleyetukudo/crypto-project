@@ -31,10 +31,11 @@ export default function Kyc() {
             <input type="file" className="mt-3 text-xs text-slate-400" />
           </div>
         </div>
-        <button className="rounded-xl bg-emerald-400 px-4 py-3 text-sm font-semibold text-slate-950 hover:bg-emerald-300">
+        <button className="rounded-xl bg-amber-400 px-4 py-3 text-sm font-semibold text-slate-950 hover:bg-amber-300">
           Submit Documents
         </button>
       </div>
     </div>
   );
 }
+

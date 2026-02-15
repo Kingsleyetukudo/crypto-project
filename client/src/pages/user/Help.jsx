@@ -47,10 +47,11 @@ export default function Help() {
       <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
         <h3 className="text-lg font-semibold text-white">Need More Help?</h3>
         <p className="mt-2 text-sm text-slate-400">
-          Contact support at <span className="text-emerald-300">support@cryptos.com</span>
+          Contact support at <span className="text-amber-300">support@cryptos.com</span>
           {" "}with your account email and transaction reference for faster assistance.
         </p>
       </div>
     </div>
   );
 }
+

@@ -144,7 +144,7 @@ export default function Deposit() {
             <button
               type="button"
               onClick={handleCopyAddress}
-              className="inline-flex items-center gap-1 rounded-lg border border-white/10 px-2 py-1 text-xs text-slate-300 hover:border-emerald-400 hover:text-emerald-200"
+              className="inline-flex items-center gap-1 rounded-lg border border-white/10 px-2 py-1 text-xs text-slate-300 hover:border-amber-400 hover:text-amber-200"
             >
               {copiedAddress === selectedWallet?.address ? (
                 <>
@@ -190,11 +190,11 @@ export default function Deposit() {
           />
         </div>
         {error && <p className="text-sm text-rose-400">{error}</p>}
-        {message && <p className="text-sm text-emerald-400">{message}</p>}
+        {message && <p className="text-sm text-amber-400">{message}</p>}
         <button
           type="submit"
           disabled={loading}
-          className="w-full rounded-xl bg-emerald-400 px-4 py-3 text-sm font-semibold text-slate-950 hover:bg-emerald-300 disabled:cursor-not-allowed disabled:opacity-70"
+          className="w-full rounded-xl bg-amber-400 px-4 py-3 text-sm font-semibold text-slate-950 hover:bg-amber-300 disabled:cursor-not-allowed disabled:opacity-70"
         >
           {loading ? "Submitting..." : "Submit Deposit"}
         </button>
@@ -249,3 +249,4 @@ export default function Deposit() {
     </div>
   );
 }
+

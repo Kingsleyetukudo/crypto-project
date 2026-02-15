@@ -56,12 +56,12 @@ export default function ForgotPassword() {
             </div>
 
             {error && <p className="text-sm text-rose-400">{error}</p>}
-            {message && <p className="text-sm text-emerald-400">{message}</p>}
+            {message && <p className="text-sm text-amber-400">{message}</p>}
 
             <button
               type="submit"
               disabled={loading}
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-500 px-4 py-3 text-sm font-semibold text-slate-950 hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-70"
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-amber-500 px-4 py-3 text-sm font-semibold text-slate-950 hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-70"
             >
               <Send className="h-4 w-4" />
               {loading ? "Sending..." : "Send OTP"}
@@ -70,8 +70,15 @@ export default function ForgotPassword() {
 
           <p className="mt-6 text-sm text-slate-400">
             Already have an OTP?{" "}
-            <Link to="/reset-password" className="text-emerald-400 hover:text-emerald-300">
+            <Link to="/reset-password" className="text-amber-400 hover:text-amber-300">
               Reset password
+            </Link>
+          </p>
+
+          <p className="mt-2 text-sm text-slate-400">
+            Back to{" "}
+            <Link to="/" className="text-amber-400 hover:text-amber-300">
+              Home
             </Link>
           </p>
         </div>
@@ -79,3 +86,4 @@ export default function ForgotPassword() {
     </div>
   );
 }
+

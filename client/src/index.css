@@ -6,6 +6,11 @@ body,
 #root {
   max-width: 100%;
   overflow-x: hidden;
+  font-family: "Poppins", sans-serif;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 .ticker-marquee {
@@ -63,4 +68,20 @@ body,
 
 .sidebar-scrollbar::-webkit-scrollbar-thumb:hover {
   background: rgba(52, 211, 153, 1);
+}
+
+.reveal-up {
+  animation: reveal-up 700ms ease-out both;
+}
+
+@keyframes reveal-up {
+  0% {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

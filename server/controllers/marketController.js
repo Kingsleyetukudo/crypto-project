@@ -8,6 +8,10 @@ const forexClient = axios.create({
   baseURL: "https://api.frankfurter.dev/v1",
 });
 
+const coingeckoClient = axios.create({
+  baseURL: process.env.COINGECKO_API_URL || "https://api.coingecko.com/api/v3",
+});
+
 const DEFAULT_SYMBOLS = ["BTC", "ETH", "SOL", "XRP", "ADA", "DOGE"];
 const DEFAULT_FOREX_SYMBOLS = ["EUR", "GBP", "JPY", "CAD", "AUD", "CHF"];
 
@@ -20,6 +24,17 @@ const KRAKEN_PAIR_MAP = {
   DOGE: "DOGEUSD",
   LTC: "LTCUSD",
   BNB: "BNBUSD",
+};
+
+const COINGECKO_ID_MAP = {
+  BTC: "bitcoin",
+  ETH: "ethereum",
+  SOL: "solana",
+  XRP: "ripple",
+  ADA: "cardano",
+  DOGE: "dogecoin",
+  LTC: "litecoin",
+  BNB: "binancecoin",
 };
 
 const CANDLE_RANGE_CONFIG = {
@@ -70,24 +85,43 @@ const normalizeTickerResult = (result = {}) =>
 export const getMarketTicker = async (req, res) => {
   try {
     const symbols = normalizeSymbols(req.query.symbols);
-    const pairs = symbols.map(toKrakenPair);
+    const ids = symbols
+      .map((symbol) => COINGECKO_ID_MAP[symbol])
+      .filter(Boolean);
 
-    const response = await krakenClient.get("/Ticker", {
-      params: { pair: pairs.join(",") },
-    });
-
-    if (Array.isArray(response.data?.error) && response.data.error.length > 0) {
-      return res.status(502).json({
-        message: "Kraken ticker returned an error",
-        details: response.data.error,
-      });
+    if (!ids.length) {
+      return res.json({ items: [], total: 0 });
     }
 
-    const items = normalizeTickerResult(response.data?.result || {});
+    const response = await coingeckoClient.get("/coins/markets", {
+      params: {
+        vs_currency: "usd",
+        ids: ids.join(","),
+        price_change_percentage: "24h",
+      },
+    });
+
+    const items = Array.isArray(response.data)
+      ? response.data.map((coin) => ({
+          symbol: String(coin?.symbol || "").toUpperCase(),
+          pair: `${String(coin?.symbol || "").toUpperCase()}/USD`,
+          lastPrice: Number(coin?.current_price || 0),
+          open24h: 0,
+          changePercent: Number(coin?.price_change_percentage_24h || 0),
+          high24h: Number(coin?.high_24h || 0),
+          low24h: Number(coin?.low_24h || 0),
+          volume24h: Number(coin?.total_volume || 0),
+          quote: "USD",
+        }))
+      : [];
+
     return res.json({ items, total: items.length });
   } catch (error) {
     return res.status(500).json({
-      message: error?.response?.data?.error?.[0] || "Failed to fetch market ticker",
+      message:
+        error?.response?.data?.error?.[0] ||
+        error?.response?.data?.error ||
+        "Failed to fetch market ticker",
     });
   }
 };

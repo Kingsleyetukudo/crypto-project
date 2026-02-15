@@ -116,7 +116,7 @@ export default function Withdrawals() {
                         <button
                           onClick={() => handleAction(tx._id, "completed")}
                           disabled={actionId === tx._id}
-                          className="inline-flex items-center gap-2 rounded-full bg-emerald-500 px-4 py-2 text-xs font-semibold text-slate-950 hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-70"
+                          className="inline-flex items-center gap-2 rounded-full bg-amber-500 px-4 py-2 text-xs font-semibold text-slate-950 hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-70"
                         >
                           {actionId === tx._id ? (
                             <Loader2 className="h-4 w-4 animate-spin" />
@@ -158,3 +158,4 @@ export default function Withdrawals() {
     </div>
   );
 }
+

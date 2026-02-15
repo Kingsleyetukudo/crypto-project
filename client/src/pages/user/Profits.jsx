@@ -56,7 +56,7 @@ export default function Profits() {
                       : "—"}
                   </p>
                 </div>
-                <p className="font-semibold text-emerald-300">+${tx.amount}</p>
+                <p className="font-semibold text-amber-300">+${tx.amount}</p>
               </div>
             ))}
             <Pagination
@@ -72,3 +72,4 @@ export default function Profits() {
     </div>
   );
 }
+

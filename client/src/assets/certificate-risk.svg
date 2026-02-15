@@ -1,0 +1,13 @@
+<svg width="1200" height="760" viewBox="0 0 1200 760" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="760" rx="28" fill="#0B1224"/>
+  <rect x="52" y="52" width="1096" height="656" rx="22" fill="#0E1832" stroke="#1E2E52"/>
+  <rect x="96" y="108" width="1008" height="88" rx="14" fill="#132142"/>
+  <text x="130" y="158" fill="#E2E8F0" font-size="34" font-family="Arial, sans-serif" font-weight="700">Goldchain Risk Control Certificate</text>
+  <rect x="96" y="232" width="620" height="22" rx="8" fill="#1A2B51"/>
+  <rect x="96" y="268" width="760" height="22" rx="8" fill="#1A2B51"/>
+  <rect x="96" y="304" width="540" height="22" rx="8" fill="#1A2B51"/>
+  <circle cx="934" cy="476" r="118" fill="#0F2442" stroke="#34D399" stroke-width="3"/>
+  <path d="M872 476L915 519L1000 434" stroke="#34D399" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="96" y="520" fill="#93C5FD" font-size="28" font-family="Arial, sans-serif">Issued: 2026</text>
+  <text x="96" y="566" fill="#CBD5E1" font-size="24" font-family="Arial, sans-serif">Framework: Internal Risk Governance</text>
+</svg>

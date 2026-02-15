@@ -121,7 +121,7 @@ export default function LiveTrades() {
               <p
                 className={`text-sm font-semibold ${
                   Number(ticker?.changePercent) >= 0
-                    ? "text-emerald-300"
+                    ? "text-amber-300"
                     : "text-rose-300"
                 }`}
               >
@@ -160,7 +160,7 @@ export default function LiveTrades() {
                       <span>{formatNumber(trade.volume, 5)}</span>
                       <span
                         className={
-                          trade.side === "buy" ? "text-emerald-300" : "text-rose-300"
+                          trade.side === "buy" ? "text-amber-300" : "text-rose-300"
                         }
                       >
                         {trade.side}
@@ -202,3 +202,4 @@ export default function LiveTrades() {
     </div>
   );
 }
+

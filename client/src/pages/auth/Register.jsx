@@ -5,6 +5,7 @@ import api from "../../api/axios.js";
 import countries from "i18n-iso-countries";
 import enCountries from "i18n-iso-countries/langs/en.json";
 import currencyCodes from "currency-codes";
+import Logo from "../../assets/Goldchain-logo.png";
 
 export default function Register() {
   const navigate = useNavigate();
@@ -100,7 +101,9 @@ export default function Register() {
     setSendingOtp(true);
     try {
       const res = await api.post("/auth/register-otp", { email: form.email });
-      setMessage(res?.data?.message || "Registration OTP sent to email.");
+      const baseMessage = res?.data?.message || "Registration OTP sent to email.";
+      const smtpError = res?.data?.smtpError ? ` (${res.data.smtpError})` : "";
+      setMessage(`${baseMessage}${smtpError}`);
     } catch (err) {
       setError(err?.response?.data?.message || "Failed to send OTP.");
     } finally {
@@ -167,7 +170,7 @@ export default function Register() {
                   type="button"
                   onClick={handleSendOtp}
                   disabled={sendingOtp}
-                  className="mt-3 rounded-lg border border-slate-700 px-3 py-2 text-xs font-semibold text-slate-200 hover:border-emerald-500 hover:text-emerald-300 disabled:cursor-not-allowed disabled:opacity-70"
+                  className="mt-3 rounded-lg border border-slate-700 px-3 py-2 text-xs font-semibold text-slate-200 hover:border-amber-500 hover:text-amber-300 disabled:cursor-not-allowed disabled:opacity-70"
                 >
                   {sendingOtp ? "Sending OTP..." : "Send OTP to Email"}
                 </button>
@@ -297,12 +300,12 @@ export default function Register() {
               </div>
 
               {error && <p className="text-sm text-rose-400">{error}</p>}
-              {message && <p className="text-sm text-emerald-400">{message}</p>}
+              {message && <p className="text-sm text-amber-400">{message}</p>}
 
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full rounded-xl bg-emerald-500 px-4 py-3 text-sm font-semibold text-slate-950 hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-70"
+                className="w-full rounded-xl bg-amber-500 px-4 py-3 text-sm font-semibold text-slate-950 hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-70"
               >
                 {loading ? "Creating..." : "Create Account"}
               </button>
@@ -310,14 +313,22 @@ export default function Register() {
 
             <p className="mt-6 text-sm text-slate-400">
               Already have an account?{" "}
-              <Link to="/login" className="text-emerald-400 hover:text-emerald-300">
+              <Link to="/login" className="text-amber-400 hover:text-amber-300">
                 Sign in
+              </Link>
+            </p>
+
+            <p className="mt-2 text-sm text-slate-400">
+              Back to{" "}
+              <Link to="/" className="text-amber-400 hover:text-amber-300">
+                Home
               </Link>
             </p>
           </div>
 
           <div className="flex flex-col justify-center gap-6">
-            <p className="text-xs uppercase tracking-[0.4em] text-cyan-400">
+            <img src={Logo} alt="Goldchain logo" className="w-28" />
+            <p className="text-xs uppercase tracking-[0.4em] text-amber-400">
               Build Wealth
             </p>
             <h1 className="text-3xl font-semibold leading-tight sm:text-4xl">
@@ -333,3 +344,4 @@ export default function Register() {
     </div>
   );
 }
+

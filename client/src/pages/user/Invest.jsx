@@ -102,7 +102,7 @@ export default function Invest() {
           </div>
         )}
         {message && (
-          <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200">
+          <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-200">
             {message}
           </div>
         )}
@@ -111,7 +111,7 @@ export default function Invest() {
           {plans.map((plan) => (
             <div
               key={plan._id}
-              className="group rounded-2xl border border-slate-800 bg-slate-900/70 p-6 transition hover:-translate-y-1 hover:border-emerald-400/40"
+              className="group rounded-2xl border border-slate-800 bg-slate-900/70 p-6 transition hover:-translate-y-1 hover:border-amber-400/40"
             >
               <div className="flex items-center justify-between">
                 <span className="text-xs uppercase tracking-[0.3em] text-slate-500">
@@ -125,18 +125,18 @@ export default function Invest() {
               </p>
               <div className="mt-6 space-y-3 text-xs text-slate-400">
                 <div className="flex items-center gap-2">
-                  <Shield className="h-4 w-4 text-emerald-400" />
+                  <Shield className="h-4 w-4 text-amber-400" />
                   Capital protected
                 </div>
                 <div className="flex items-center gap-2">
-                  <Sparkles className="h-4 w-4 text-emerald-400" />
+                  <Sparkles className="h-4 w-4 text-amber-400" />
                   Auto-compounded
                 </div>
               </div>
               <button
                 disabled={loading}
                 onClick={() => setSelectedPlan(plan)}
-                className="mt-8 w-full rounded-xl bg-emerald-500 px-4 py-3 text-sm font-semibold text-slate-950 hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-70"
+                className="mt-8 w-full rounded-xl bg-amber-500 px-4 py-3 text-sm font-semibold text-slate-950 hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-70"
               >
                 {loading ? "Processing..." : "Invest"}
               </button>
@@ -186,11 +186,11 @@ export default function Invest() {
               />
             </div>
             {error && <p className="mt-3 text-sm text-rose-400">{error}</p>}
-            {message && <p className="mt-3 text-sm text-emerald-400">{message}</p>}
+            {message && <p className="mt-3 text-sm text-amber-400">{message}</p>}
             <button
               onClick={handleInvest}
               disabled={loading}
-              className="mt-6 w-full rounded-xl bg-emerald-400 px-4 py-3 text-sm font-semibold text-slate-950 hover:bg-emerald-300 disabled:cursor-not-allowed disabled:opacity-70"
+              className="mt-6 w-full rounded-xl bg-amber-400 px-4 py-3 text-sm font-semibold text-slate-950 hover:bg-amber-300 disabled:cursor-not-allowed disabled:opacity-70"
             >
               {loading ? "Processing..." : "Confirm Investment"}
             </button>
@@ -200,3 +200,4 @@ export default function Invest() {
     </div>
   );
 }
+

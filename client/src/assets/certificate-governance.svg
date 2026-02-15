@@ -1,0 +1,14 @@
+<svg width="1200" height="760" viewBox="0 0 1200 760" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="760" rx="28" fill="#120A22"/>
+  <rect x="52" y="52" width="1096" height="656" rx="22" fill="#1B1134" stroke="#3C2A67"/>
+  <rect x="96" y="108" width="1008" height="88" rx="14" fill="#2A1C50"/>
+  <text x="130" y="158" fill="#F1F5F9" font-size="34" font-family="Arial, sans-serif" font-weight="700">Goldchain Trading Governance Certificate</text>
+  <rect x="96" y="232" width="660" height="22" rx="8" fill="#352365"/>
+  <rect x="96" y="268" width="820" height="22" rx="8" fill="#352365"/>
+  <rect x="96" y="304" width="560" height="22" rx="8" fill="#352365"/>
+  <circle cx="936" cy="476" r="116" fill="#241746" stroke="#A78BFA" stroke-width="3"/>
+  <path d="M876 510L936 418L996 510" stroke="#A78BFA" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+  <line x1="936" y1="418" x2="936" y2="534" stroke="#C4B5FD" stroke-width="6" stroke-linecap="round"/>
+  <text x="96" y="520" fill="#C4B5FD" font-size="28" font-family="Arial, sans-serif">Issued: 2025</text>
+  <text x="96" y="566" fill="#E2E8F0" font-size="24" font-family="Arial, sans-serif">Governance: Execution and Process Integrity</text>
+</svg>

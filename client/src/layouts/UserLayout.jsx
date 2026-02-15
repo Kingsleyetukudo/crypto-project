@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import api from "../api/axios.js";
 import profileAvatar from "../assets/profile-avatar.png";
+import Logo from "../assets/new-logo-used.png";
 import FloatingChatWidget from "../components/FloatingChatWidget.jsx";
 
 const normalizeWallets = (data) => {
@@ -119,12 +120,13 @@ export default function UserLayout({ children }) {
               <div className="flex items-center justify-between">
                 <Link
                   to="/"
-                  className="flex items-center gap-3 text-xl font-semibold"
+                  className="inline-flex items-center"
                 >
-                  <span className="grid h-9 w-9 place-items-center rounded-full bg-emerald-400/15">
-                    <span className="h-4 w-4 rounded-full border-2 border-emerald-300" />
-                  </span>
-                  Cryptos
+                  <img
+                    src={Logo}
+                    alt="Goldchain logo"
+                    className="h-12 w-auto max-w-[160px] object-contain"
+                  />
                 </Link>
                 <button
                   type="button"
@@ -146,7 +148,7 @@ export default function UserLayout({ children }) {
                       className={({ isActive }) =>
                         `group flex items-center gap-3 rounded-xl px-4 py-3 text-sm transition ${
                           isActive
-                            ? "bg-emerald-400 text-slate-950 shadow-[0_0_0_1px_rgba(52,211,153,0.4)]"
+                            ? "bg-amber-400 text-slate-950 shadow-[0_0_0_1px_rgba(52,211,153,0.4)]"
                             : "text-slate-400 hover:bg-white/5 hover:text-white"
                         }`
                       }
@@ -185,15 +187,16 @@ export default function UserLayout({ children }) {
         )}
 
         <aside className="sticky top-0 hidden h-screen w-72 flex-col border-r border-white/10 bg-gradient-to-b from-[#101214] via-[#0b0c0d] to-[#0b0c0d] px-6 py-8 lg:flex">
-          <Link
-            to="/"
-            className="flex items-center gap-3 text-xl font-semibold"
-          >
-            <span className="grid h-9 w-9 place-items-center rounded-full bg-emerald-400/15">
-              <span className="h-4 w-4 rounded-full border-2 border-emerald-300" />
-            </span>
-            Cryptos
-          </Link>
+        <Link
+          to="/"
+          className="inline-flex items-center"
+        >
+          <img
+            src={Logo}
+            alt="Goldchain logo"
+            className="h-12 w-auto max-w-[160px] object-contain"
+          />
+        </Link>
           <nav className="sidebar-scrollbar mt-10 flex flex-1 flex-col gap-2 overflow-y-auto pr-2">
             {navItems.map((item) => {
               const Icon = item.icon;
@@ -204,7 +207,7 @@ export default function UserLayout({ children }) {
                   className={({ isActive }) =>
                     `group flex items-center gap-3 rounded-xl px-4 py-3 text-sm transition ${
                       isActive
-                        ? "bg-emerald-400 text-slate-950 shadow-[0_0_0_1px_rgba(52,211,153,0.4)]"
+                        ? "bg-amber-400 text-slate-950 shadow-[0_0_0_1px_rgba(52,211,153,0.4)]"
                         : "text-slate-400 hover:bg-white/5 hover:text-white"
                     }`
                   }
@@ -304,10 +307,12 @@ export default function UserLayout({ children }) {
               </div>
             </div>
           </header>
-          <main className="min-w-0 flex-1 overflow-y-auto overflow-x-hidden px-4 py-6 sm:px-6 sm:py-8">{children}</main>
+          <main className="min-w-0 flex-1 overflow-y-auto overflow-x-hidden px-4 py-6 sm:px-6 sm:py-8">
+            {children}
+          </main>
 
           <footer className="border-t border-white/10 px-4 py-4 text-xs text-slate-600 sm:px-6">
-            (c) {new Date().getFullYear()} Cryptos. All rights reserved.
+            (c) {new Date().getFullYear()} Goldchain. All rights reserved.
           </footer>
         </div>
       </div>

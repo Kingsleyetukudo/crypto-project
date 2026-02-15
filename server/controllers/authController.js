@@ -9,6 +9,7 @@ import PasswordChangeOtp from "../models/PasswordChangeOtp.js";
 import { sendMail } from "../utils/mailer.js";
 
 const OTP_TTL_MS = 10 * 60 * 1000;
+const isProduction = process.env.NODE_ENV === "production";
 
 const signToken = (user) =>
   jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, {
@@ -35,17 +36,26 @@ export const sendRegistrationOtp = async (req, res) => {
     await RegistrationOtp.findOneAndUpdate(
       { email: normalizedEmail },
       { otpHash, expiresAt },
-      { upsert: true, new: true, setDefaultsOnInsert: true },
+      { upsert: true, returnDocument: "after", setDefaultsOnInsert: true },
     );
 
-    await sendMail({
-      to: normalizedEmail,
-      subject: "Your registration OTP",
-      text: `Your OTP code is ${otp}. It expires in 10 minutes.`,
-      html: `<p>Your OTP code is <strong>${otp}</strong>. It expires in 10 minutes.</p>`,
-    });
-
-    return res.json({ message: "Registration OTP sent to email" });
+    try {
+      await sendMail({
+        to: normalizedEmail,
+        subject: "Your registration OTP",
+        text: `Your OTP code is ${otp}. It expires in 10 minutes.`,
+        html: `<p>Your OTP code is <strong>${otp}</strong>. It expires in 10 minutes.</p>`,
+      });
+      return res.json({ message: "Registration OTP sent to email" });
+    } catch (mailError) {
+      if (isProduction) {
+        return res.status(500).json({ message: "Failed to send registration OTP" });
+      }
+      return res.json({
+        message: `SMTP is unavailable. Development OTP: ${otp}`,
+        smtpError: mailError?.message || "Unknown SMTP error",
+      });
+    }
   } catch (error) {
     return res.status(500).json({ message: "Failed to send registration OTP" });
   }
@@ -389,7 +399,7 @@ export const requestPasswordChangeOtp = async (req, res) => {
     await PasswordChangeOtp.findOneAndUpdate(
       { userId: user._id },
       { otpHash, expiresAt, newPasswordHash },
-      { upsert: true, new: true, setDefaultsOnInsert: true },
+      { upsert: true, returnDocument: "after", setDefaultsOnInsert: true },
     );
 
     await sendMail({

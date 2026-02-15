@@ -17,6 +17,7 @@ import Investments from "./pages/admin/Investments.jsx";
 import KycApproval from "./pages/admin/KycApproval.jsx";
 import Wallets from "./pages/admin/Wallets.jsx";
 import AdminHistory from "./pages/admin/History.jsx";
+import AdminSettings from "./pages/admin/Settings.jsx";
 import Deposit from "./pages/user/Deposit.jsx";
 import Withdraw from "./pages/user/Withdraw.jsx";
 import MyInvestments from "./pages/user/MyInvestments.jsx";
@@ -28,12 +29,14 @@ import Referrals from "./pages/user/Referrals.jsx";
 import Kyc from "./pages/user/Kyc.jsx";
 import Help from "./pages/user/Help.jsx";
 import Settings from "./pages/user/Settings.jsx";
+import ContactPage from "./pages/ContactPage.jsx";
 
 export default function App() {
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<LandingPage />} />
+        <Route path="/contact" element={<ContactPage />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
@@ -234,6 +237,16 @@ export default function App() {
             <ProtectedRoute role="admin">
               <AdminLayout>
                 <AdminHistory />
+              </AdminLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/settings"
+          element={
+            <ProtectedRoute role="admin">
+              <AdminLayout>
+                <AdminSettings />
               </AdminLayout>
             </ProtectedRoute>
           }

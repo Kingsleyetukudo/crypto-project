@@ -318,17 +318,17 @@ export default function UserDashboard() {
   return (
     <div className="grid gap-8 overflow-x-hidden lg:grid-cols-[1.2fr_0.8fr]">
       <div className="space-y-6 overflow-hidden">
-        <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-emerald-500/20 via-emerald-500/10 to-transparent p-6 shadow-[0_20px_60px_-40px_rgba(52,211,153,0.7)]">
+        <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-amber-500/20 via-amber-500/10 to-transparent p-6 shadow-[0_20px_60px_-40px_rgba(52,211,153,0.7)]">
           <div className="flex flex-wrap items-center justify-between gap-6">
             <div>
-              <p className="text-xs uppercase tracking-[0.3em] text-emerald-200/70">
+              <p className="text-xs uppercase tracking-[0.3em] text-amber-200/70">
                 Premium access
               </p>
               <h2 className="mt-2 text-2xl font-semibold">
                 Upgrade your plan to Premium and get unlimited access
               </h2>
             </div>
-            <button className="rounded-full bg-emerald-400 px-5 py-2 text-sm font-semibold text-slate-950 hover:bg-emerald-300">
+            <button className="rounded-full bg-amber-400 px-5 py-2 text-sm font-semibold text-slate-950 hover:bg-amber-300">
               Upgrade Now
             </button>
           </div>
@@ -337,7 +337,7 @@ export default function UserDashboard() {
         <MarketTickerBar />
 
         <div className="grid gap-4 md:grid-cols-3">
-          <div className="rounded-2xl border border-white/10 bg-emerald-400/90 p-5 text-slate-950">
+          <div className="rounded-2xl border border-white/10 bg-amber-400/90 p-5 text-slate-950">
             <div className="flex items-center justify-between text-xs uppercase tracking-[0.3em]">
               <span>Total Assets</span>
               <Coins className="h-4 w-4" />
@@ -345,14 +345,14 @@ export default function UserDashboard() {
             <p className="mt-4 text-2xl font-semibold">
               ${profile?.balance?.toLocaleString?.() ?? "0"}
             </p>
-            <p className="mt-1 text-xs text-emerald-900/70">
+            <p className="mt-1 text-xs text-amber-900/70">
               {loading ? "Loading..." : "Across all wallets"}
             </p>
           </div>
           <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
             <div className="flex items-center justify-between text-xs uppercase tracking-[0.3em] text-slate-400">
               <span>Total Deposits</span>
-              <Wallet className="h-4 w-4 text-emerald-300" />
+              <Wallet className="h-4 w-4 text-amber-300" />
             </div>
             <p className="mt-4 text-2xl font-semibold text-white">
               ${Math.max(0, (profile?.balance || 0) + 0).toLocaleString()}
@@ -362,7 +362,7 @@ export default function UserDashboard() {
           <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
             <div className="flex items-center justify-between text-xs uppercase tracking-[0.3em] text-slate-400">
               <span>APY</span>
-              <Sparkles className="h-4 w-4 text-emerald-300" />
+              <Sparkles className="h-4 w-4 text-amber-300" />
             </div>
             <p className="mt-4 text-2xl font-semibold text-white">
               +{activeInvestments ? "8.6" : "0.0"}%
@@ -425,7 +425,7 @@ export default function UserDashboard() {
                 <CalendarDays className="h-3.5 w-3.5" />
                 Select Date
               </button>
-              <button type="button" className="h-8 rounded-lg bg-violet-500 px-3 font-semibold text-white hover:bg-violet-400">
+              <button type="button" className="h-8 rounded-lg bg-amber-500 px-3 font-semibold text-white hover:bg-amber-400">
                 Trade {activeSymbol}
               </button>
             </div>
@@ -509,7 +509,7 @@ export default function UserDashboard() {
               </div>
               <a
                 href="/news"
-                className="text-xs font-semibold text-emerald-300 hover:text-emerald-200"
+                className="text-xs font-semibold text-amber-300 hover:text-amber-200"
               >
                 View all
               </a>
@@ -540,7 +540,7 @@ export default function UserDashboard() {
                         href={article.url}
                         target="_blank"
                         rel="noreferrer"
-                        className="mt-3 inline-flex items-center gap-1 text-xs text-emerald-300 hover:text-emerald-200"
+                        className="mt-3 inline-flex items-center gap-1 text-xs text-amber-300 hover:text-amber-200"
                       >
                         Read
                         <ArrowUpRight className="h-3.5 w-3.5" />
@@ -587,7 +587,7 @@ export default function UserDashboard() {
         </div>
 
         <div className="rounded-3xl border border-white/10 bg-gradient-to-b from-[#1b1d22] to-[#14161a] p-6">
-          <p className="text-sm font-semibold text-emerald-200">
+          <p className="text-sm font-semibold text-amber-200">
             Account Security
           </p>
           <p className="text-xs text-slate-500">Security Message</p>
@@ -595,13 +595,13 @@ export default function UserDashboard() {
             Hello {profile?.firstName || "there"}, you need to secure your
             account with 2 factor authentication.
           </p>
-          <button className="mt-6 w-full rounded-full bg-[#3a63d2] px-4 py-3 text-sm font-semibold text-white hover:bg-[#345cc2]">
+          <button className="mt-6 w-full rounded-full bg-amber-400 px-4 py-3 text-sm font-semibold text-slate-950 hover:bg-amber-300">
             Secure Now
           </button>
         </div>
 
         <div className="rounded-3xl border border-white/10 bg-gradient-to-b from-[#1b1d22] to-[#14161a] p-6">
-          <p className="text-sm font-semibold text-emerald-200">
+          <p className="text-sm font-semibold text-amber-200">
             Referral Program
           </p>
           <p className="text-xs text-slate-500">
@@ -617,7 +617,7 @@ export default function UserDashboard() {
               </span>
               <button
                 onClick={handleCopyReferral}
-                className="rounded-full border border-white/10 px-3 py-2 text-xs text-slate-300 hover:border-emerald-400 hover:text-emerald-200"
+                className="rounded-full border border-white/10 px-3 py-2 text-xs text-slate-300 hover:border-amber-400 hover:text-amber-200"
               >
                 {refCopied ? "Copied" : "Copy"}
               </button>
@@ -633,13 +633,13 @@ export default function UserDashboard() {
               <p className="text-xs text-slate-500">Referral Earnings</p>
             </div>
           </div>
-          <button className="mt-6 w-full rounded-full bg-[#3a63d2] px-4 py-3 text-sm font-semibold text-white hover:bg-[#345cc2]">
+          <button className="mt-6 w-full rounded-full bg-amber-400 px-4 py-3 text-sm font-semibold text-slate-950 hover:bg-amber-300">
             View All Referrals
           </button>
         </div>
 
         <div className="rounded-3xl border border-white/10 bg-gradient-to-b from-[#1b1d22] to-[#14161a] p-6">
-          <p className="text-sm font-semibold text-emerald-200">
+          <p className="text-sm font-semibold text-amber-200">
             Quick Transaction
           </p>
           <p className="text-xs text-slate-500">Do a quick transaction</p>
@@ -649,7 +649,7 @@ export default function UserDashboard() {
               className="w-full bg-transparent text-sm text-slate-200 placeholder:text-slate-600 focus:outline-none"
             />
           </div>
-          <button className="mt-6 w-full rounded-full bg-[#3a63d2] px-4 py-3 text-sm font-semibold text-white hover:bg-[#345cc2]">
+          <button className="mt-6 w-full rounded-full bg-amber-400 px-4 py-3 text-sm font-semibold text-slate-950 hover:bg-amber-300">
             Deposit
           </button>
         </div>
@@ -702,7 +702,7 @@ export default function UserDashboard() {
             </div>
             <button
               onClick={() => setShowDeposit(true)}
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-400 px-4 py-3 text-sm font-semibold text-slate-950 hover:bg-emerald-300"
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-amber-400 px-4 py-3 text-sm font-semibold text-slate-950 hover:bg-amber-300"
             >
               Buy BTC
               <ArrowUpRight className="h-4 w-4" />
@@ -720,3 +720,4 @@ export default function UserDashboard() {
     </div>
   );
 }
+

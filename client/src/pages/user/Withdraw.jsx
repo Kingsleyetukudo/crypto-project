@@ -100,11 +100,11 @@ export default function Withdraw() {
           />
         </div>
         {error && <p className="text-sm text-rose-400">{error}</p>}
-        {message && <p className="text-sm text-emerald-400">{message}</p>}
+        {message && <p className="text-sm text-amber-400">{message}</p>}
         <button
           type="submit"
           disabled={loading}
-          className="w-full rounded-xl bg-emerald-400 px-4 py-3 text-sm font-semibold text-slate-950 hover:bg-emerald-300 disabled:cursor-not-allowed disabled:opacity-70"
+          className="w-full rounded-xl bg-amber-400 px-4 py-3 text-sm font-semibold text-slate-950 hover:bg-amber-300 disabled:cursor-not-allowed disabled:opacity-70"
         >
           {loading ? "Submitting..." : "Submit Withdrawal"}
         </button>
@@ -161,3 +161,4 @@ export default function Withdraw() {
     </div>
   );
 }
+

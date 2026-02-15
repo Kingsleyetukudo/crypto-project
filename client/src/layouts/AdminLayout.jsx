@@ -11,11 +11,16 @@ import {
   X,
   Bell,
 } from "lucide-react";
+import Logo from "../assets/new-logo-used.png";
 
 const navItems = [
   { to: "/admin", label: "Overview", icon: Home },
   { to: "/admin/deposits", label: "Deposit Approvals", icon: ClipboardCheck },
-  { to: "/admin/withdrawals", label: "Withdrawal Approvals", icon: ClipboardCheck },
+  {
+    to: "/admin/withdrawals",
+    label: "Withdrawal Approvals",
+    icon: ClipboardCheck,
+  },
   { to: "/admin/investments", label: "Investments", icon: Activity },
   { to: "/admin/kyc", label: "KYC Approval", icon: Shield },
   { to: "/admin/wallets", label: "Deposit Wallets", icon: Activity },
@@ -50,8 +55,15 @@ export default function AdminLayout({ children }) {
             />
             <aside className="absolute left-0 top-0 flex h-full w-72 flex-col border-r border-slate-800 bg-slate-950/95 p-6">
               <div className="flex items-center justify-between">
-                <Link to="/" className="text-xl font-semibold tracking-wide">
-                  CryptoInvest
+                <Link
+                  to="/"
+                  className="inline-flex items-center"
+                >
+                  <img
+                    src={Logo}
+                    alt="Goldchain logo"
+                    className="h-12 w-auto max-w-[160px] object-contain"
+                  />
                 </Link>
                 <button
                   type="button"
@@ -76,7 +88,7 @@ export default function AdminLayout({ children }) {
                       className={({ isActive }) =>
                         `flex items-center gap-3 rounded-xl px-4 py-3 text-sm transition ${
                           isActive
-                            ? "bg-rose-500/15 text-rose-200"
+                            ? "bg-amber-500/15 text-amber-200"
                             : "text-slate-300 hover:bg-slate-900/60"
                         }`
                       }
@@ -89,7 +101,7 @@ export default function AdminLayout({ children }) {
               </nav>
               <button
                 onClick={handleLogout}
-                className="mt-6 flex items-center gap-3 rounded-xl border border-slate-800 px-4 py-3 text-sm text-slate-300 hover:border-rose-400 hover:text-rose-200"
+                className="mt-6 flex items-center gap-3 rounded-xl border border-slate-800 px-4 py-3 text-sm text-slate-300 hover:border-amber-400 hover:text-amber-200"
               >
                 <LogOut className="h-4 w-4" />
                 Sign out
@@ -99,8 +111,15 @@ export default function AdminLayout({ children }) {
         )}
 
         <aside className="sticky top-0 hidden h-screen w-72 flex-col border-r border-slate-800 bg-slate-950/80 p-6 lg:flex">
-          <Link to="/" className="text-xl font-semibold tracking-wide">
-            CryptoInvest
+          <Link
+            to="/"
+            className="inline-flex items-center"
+          >
+            <img
+              src={Logo}
+              alt="Goldchain logo"
+              className="h-12 w-auto max-w-[160px] object-contain"
+            />
           </Link>
           <p className="mt-2 text-xs uppercase tracking-[0.3em] text-slate-500">
             Admin Console
@@ -115,7 +134,7 @@ export default function AdminLayout({ children }) {
                   className={({ isActive }) =>
                     `flex items-center gap-3 rounded-xl px-4 py-3 text-sm transition ${
                       isActive
-                        ? "bg-rose-500/15 text-rose-200"
+                        ? "bg-amber-500/15 text-amber-200"
                         : "text-slate-300 hover:bg-slate-900/60"
                     }`
                   }
@@ -128,7 +147,7 @@ export default function AdminLayout({ children }) {
           </nav>
           <button
             onClick={handleLogout}
-            className="mt-6 flex items-center gap-3 rounded-xl border border-slate-800 px-4 py-3 text-sm text-slate-300 hover:border-rose-400 hover:text-rose-200"
+            className="mt-6 flex items-center gap-3 rounded-xl border border-slate-800 px-4 py-3 text-sm text-slate-300 hover:border-amber-400 hover:text-amber-200"
           >
             <LogOut className="h-4 w-4" />
             Sign out
@@ -152,10 +171,12 @@ export default function AdminLayout({ children }) {
                 </div>
               </div>
               <div className="flex items-center justify-between gap-3">
-                <h1 className="truncate text-lg font-semibold">Admin Dashboard</h1>
+                <h1 className="truncate text-lg font-semibold">
+                  Admin Dashboard
+                </h1>
                 <button className="relative rounded-full border border-slate-700 bg-slate-900/70 p-2 text-slate-300 hover:text-white">
                   <Bell className="h-4 w-4" />
-                  <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-rose-400" />
+                  <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-amber-400" />
                 </button>
               </div>
             </div>
@@ -170,9 +191,9 @@ export default function AdminLayout({ children }) {
               <div className="flex items-center gap-3">
                 <button className="relative rounded-full border border-slate-800 bg-slate-900/70 p-2 text-slate-300 hover:text-white">
                   <Bell className="h-4 w-4" />
-                  <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-rose-400" />
+                  <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-amber-400" />
                 </button>
-                <button className="inline-flex items-center gap-2 rounded-full border border-slate-800 px-4 py-2 text-xs text-slate-300 hover:border-rose-400 hover:text-rose-200">
+                <button className="inline-flex items-center gap-2 rounded-full border border-slate-800 px-4 py-2 text-xs text-slate-300 hover:border-amber-400 hover:text-amber-200">
                   <Shield className="h-3 w-3" />
                   Risk Mode
                 </button>
@@ -180,10 +201,12 @@ export default function AdminLayout({ children }) {
             </div>
           </header>
 
-          <main className="min-w-0 flex-1 overflow-y-auto overflow-x-hidden px-4 py-6 sm:px-6 sm:py-8">{children}</main>
+          <main className="min-w-0 flex-1 overflow-y-auto overflow-x-hidden px-4 py-6 sm:px-6 sm:py-8">
+            {children}
+          </main>
 
           <footer className="border-t border-slate-800 px-4 py-4 text-xs text-slate-500 sm:px-6">
-            (c) {new Date().getFullYear()} CryptoInvest. Admin access required.
+            (c) {new Date().getFullYear()} Goldchain. Admin access required.
           </footer>
         </div>
       </div>
