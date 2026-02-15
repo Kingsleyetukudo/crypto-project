@@ -343,15 +343,15 @@ function InfiniteSlider({ items, renderItem, autoMs = 4500 }) {
           onTransitionEnd={onTransitionEnd}
         >
           {extended.map((item, i) => (
-            <div key={i} className="w-full shrink-0 px-2">
+            <div key={i} className="w-full shrink-0 px-1 sm:px-2">
               {renderItem(item)}
             </div>
           ))}
         </div>
       </div>
 
-      <div className="flex items-center justify-between">
-        <div className="flex gap-2">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex gap-2 self-end sm:self-auto">
           {items.map((_, i) => (
             <button
               key={i}
@@ -558,6 +558,48 @@ export default function LandingPage() {
                 </a>
               ))}
             </div>
+            <div className="mt-4 flex flex-col gap-3">
+              {isLoggedIn ? (
+                <>
+                  <Link
+                    to={dashboardPath}
+                    onClick={() => setMobileNavOpen(false)}
+                    className="inline-flex items-center justify-center gap-2 rounded-full bg-amber-300 px-5 py-3 text-sm font-semibold text-slate-950 hover:bg-amber-200"
+                  >
+                    Dashboard
+                    <ArrowRight className="h-4 w-4" />
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMobileNavOpen(false);
+                      handleLogout();
+                    }}
+                    className="rounded-full border border-white/20 px-5 py-3 text-sm font-semibold text-slate-200 hover:border-amber-300 hover:text-amber-200"
+                  >
+                    Logout
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link
+                    to="/login"
+                    onClick={() => setMobileNavOpen(false)}
+                    className="rounded-full border border-white/20 px-5 py-3 text-center text-sm font-semibold text-slate-200 hover:border-amber-300 hover:text-amber-200"
+                  >
+                    Login
+                  </Link>
+                  <Link
+                    to="/register"
+                    onClick={() => setMobileNavOpen(false)}
+                    className="inline-flex items-center justify-center gap-2 rounded-full bg-amber-300 px-5 py-3 text-sm font-semibold text-slate-950 hover:bg-amber-200"
+                  >
+                    Sign Up
+                    <ArrowRight className="h-4 w-4" />
+                  </Link>
+                </>
+              )}
+            </div>
           </div>
         )}
       </header>
@@ -657,7 +699,7 @@ export default function LandingPage() {
                 <h3 className="!text-4xl font-semibold tracking-tight text-white sm:!text-7xl">
                   Investment Plans
                 </h3>
-                <p className="mt-2 text-slate-300  !text-sm mb-8 sm:!text-lg !w-full sm:!w-[60%]">
+                <p className="mt-2 text-slate-300  !text-sm mb-8 sm:!text-lg ">
                   Here is our Structured investment plans. With super
                   competitive parameters, you can choose the one that best suits
                   your trading style and goals.
@@ -953,9 +995,9 @@ export default function LandingPage() {
 
           <section
             id="certificates"
-            className="reveal-up scroll-mt-28 mt-25 grid gap-8 lg:grid-cols-2"
+            className="reveal-up scroll-mt-28 mt-25 grid grid-cols-1 gap-6 sm:gap-8 lg:grid-cols-2"
           >
-            <div>
+            <div className="min-w-0">
               <h3 className="!text-4xl font-semibold tracking-tight text-white sm:!text-6xl">
                 Trading Certificates
               </h3>
@@ -971,40 +1013,42 @@ export default function LandingPage() {
                 />
               </div>
             </div>
-            <InfiniteSlider
-              items={certificates}
-              autoMs={5000}
-              renderItem={(item) => (
-                <div className="overflow-hidden rounded-2xl border border-white/10 bg-slate-800/70">
-                  <img
-                    src={item.image}
-                    alt={item.title}
-                    className="w-full object-cover"
-                  />
-                  <div className="border-t border-white/10 p-4">
-                    <p className="text-xs uppercase tracking-[0.2em] text-slate-400">
-                      Certificate
-                    </p>
-                    <h4 className="mt-2 text-lg font-semibold text-white">
-                      {item.title}
-                    </h4>
-                    <p className="mt-1 text-sm text-slate-300">
-                      {item.subtitle}
-                    </p>
-                    <p className="mt-3 text-sm font-medium text-amber-300">
-                      Issued {item.year}
-                    </p>
+            <div className="min-w-0">
+              <InfiniteSlider
+                items={certificates}
+                autoMs={5000}
+                renderItem={(item) => (
+                  <div className="overflow-hidden rounded-2xl border border-white/10 bg-slate-800/70">
+                    <img
+                      src={item.image}
+                      alt={item.title}
+                      className="w-full object-cover"
+                    />
+                    <div className="border-t border-white/10 p-4">
+                      <p className="text-xs uppercase tracking-[0.2em] text-slate-400">
+                        Certificate
+                      </p>
+                      <h4 className="mt-2 text-lg font-semibold text-white">
+                        {item.title}
+                      </h4>
+                      <p className="mt-1 text-sm text-slate-300">
+                        {item.subtitle}
+                      </p>
+                      <p className="mt-3 text-sm font-medium text-amber-300">
+                        Issued {item.year}
+                      </p>
+                    </div>
                   </div>
-                </div>
-              )}
-            />
+                )}
+              />
+            </div>
           </section>
 
           <section
             id="live"
-            className="reveal-up scroll-mt-28 mt-25 grid gap-8 lg:grid-cols-2"
+            className="reveal-up scroll-mt-28 mt-25 grid grid-cols-1 gap-6 sm:gap-8 lg:grid-cols-2"
           >
-            <div>
+            <div className="min-w-0">
               <h3 className="!text-4xl font-semibold tracking-tight text-white sm:!text-6xl">
                 Live Trading Screens
               </h3>
@@ -1013,37 +1057,39 @@ export default function LandingPage() {
                 behavior in real-time style cards.
               </p>
             </div>
-            <InfiniteSlider
-              items={liveScreens}
-              autoMs={4200}
-              renderItem={(item) => (
-                <div className="rounded-2xl border border-white/10 bg-slate-950 p-5 text-white">
-                  <div className="flex items-center justify-between border-b border-white/10 pb-3">
-                    <p className="font-semibold">{item.label}</p>
-                    <span className="rounded-full bg-amber-500/15 px-2 py-1 text-xs text-amber-300">
-                      Live
-                    </span>
+            <div className="min-w-0">
+              <InfiniteSlider
+                items={liveScreens}
+                autoMs={4200}
+                renderItem={(item) => (
+                  <div className="rounded-2xl border border-white/10 bg-slate-950 p-5 text-white">
+                    <div className="flex items-center justify-between border-b border-white/10 pb-3">
+                      <p className="font-semibold">{item.label}</p>
+                      <span className="rounded-full bg-amber-500/15 px-2 py-1 text-xs text-amber-300">
+                        Live
+                      </span>
+                    </div>
+                    <div className="mt-4 grid grid-cols-1 gap-3 text-center text-sm sm:grid-cols-3">
+                      <div className="rounded-xl border border-white/10 bg-white/5 p-3">
+                        <p className="text-xs text-slate-400">P&L</p>
+                        <p className="mt-1 font-semibold text-amber-300">
+                          {item.pnl}
+                        </p>
+                      </div>
+                      <div className="rounded-xl border border-white/10 bg-white/5 p-3">
+                        <p className="text-xs text-slate-400">Win Rate</p>
+                        <p className="mt-1 font-semibold">{item.winRate}</p>
+                      </div>
+                      <div className="rounded-xl border border-white/10 bg-white/5 p-3">
+                        <p className="text-xs text-slate-400">Latency</p>
+                        <p className="mt-1 font-semibold">{item.latency}</p>
+                      </div>
+                    </div>
+                    <div className="mt-4 h-20 rounded-xl bg-gradient-to-r from-amber-500/20 via-amber-400/20 to-amber-300/20" />
                   </div>
-                  <div className="mt-4 grid grid-cols-3 gap-3 text-center text-sm">
-                    <div className="rounded-xl border border-white/10 bg-white/5 p-3">
-                      <p className="text-xs text-slate-400">P&L</p>
-                      <p className="mt-1 font-semibold text-amber-300">
-                        {item.pnl}
-                      </p>
-                    </div>
-                    <div className="rounded-xl border border-white/10 bg-white/5 p-3">
-                      <p className="text-xs text-slate-400">Win Rate</p>
-                      <p className="mt-1 font-semibold">{item.winRate}</p>
-                    </div>
-                    <div className="rounded-xl border border-white/10 bg-white/5 p-3">
-                      <p className="text-xs text-slate-400">Latency</p>
-                      <p className="mt-1 font-semibold">{item.latency}</p>
-                    </div>
-                  </div>
-                  <div className="mt-4 h-20 rounded-xl bg-gradient-to-r from-amber-500/20 via-amber-400/20 to-amber-300/20" />
-                </div>
-              )}
-            />
+                )}
+              />
+            </div>
           </section>
 
           <section
@@ -1080,40 +1126,42 @@ export default function LandingPage() {
 
           <section
             id="testimonials"
-            className="reveal-up scroll-mt-28 mt-25 grid gap-8 lg:grid-cols-2"
+            className="reveal-up scroll-mt-28 mt-25 grid grid-cols-1 gap-6 sm:gap-8 lg:grid-cols-2"
           >
-            <div>
-              <h3 className="text-5xl font-semibold text-white">
+            <div className="min-w-0">
+              <h3 className="text-2xl font-semibold text-white sm:text-4xl lg:text-5xl">
                 What Our Traders and Investors Say
               </h3>
-              <p className="mt-3 text-slate-300">
+              <p className="mt-3 text-sm text-slate-300 sm:text-base">
                 Real feedback from users who value structure, security, and
                 disciplined trading operations.
               </p>
             </div>
-            <InfiniteSlider
-              items={testimonials}
-              autoMs={3800}
-              renderItem={(item) => (
-                <article className="relative overflow-hidden rounded-2xl border border-white/10 bg-slate-900/70 p-6">
-                  <div className="absolute right-4 top-4 text-4xl font-semibold text-white/10">
-                    “
-                  </div>
-                  <p className="text-sm leading-7 text-slate-200">
-                    {item.quote}
-                  </p>
-                  <div className="mt-6 flex items-center justify-between">
-                    <div>
-                      <p className="font-semibold text-white">{item.name}</p>
-                      <p className="text-sm text-amber-300">{item.role}</p>
+            <div className="min-w-0 w-full">
+              <InfiniteSlider
+                items={testimonials}
+                autoMs={3800}
+                renderItem={(item) => (
+                  <article className="relative overflow-hidden rounded-2xl border border-white/10 bg-slate-900/70 p-4 sm:p-6">
+                    <div className="absolute right-4 top-4 text-4xl font-semibold text-white/10">
+                      “
                     </div>
-                    <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] uppercase tracking-[0.2em] text-slate-300">
-                      Verified
-                    </span>
-                  </div>
-                </article>
-              )}
-            />
+                    <p className="text-sm leading-6 text-slate-200 sm:leading-7">
+                      {item.quote}
+                    </p>
+                    <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                      <div>
+                        <p className="font-semibold text-white">{item.name}</p>
+                        <p className="text-sm text-amber-300">{item.role}</p>
+                      </div>
+                      <span className="w-fit rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] uppercase tracking-[0.2em] text-slate-300">
+                        Verified
+                      </span>
+                    </div>
+                  </article>
+                )}
+              />
+            </div>
           </section>
 
           <section
@@ -1261,3 +1309,4 @@ export default function LandingPage() {
     </div>
   );
 }
+
