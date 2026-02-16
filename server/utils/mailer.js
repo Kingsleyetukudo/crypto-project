@@ -10,6 +10,7 @@ const looksLikeEmail = (value = "") => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(
 
 let transporter;
 let mailConfig;
+let resendConfig;
 
 const getMailConfig = () => {
   if (mailConfig) return mailConfig;
@@ -50,7 +51,72 @@ const getTransporter = () => {
   return transporter;
 };
 
+const getResendConfig = () => {
+  if (resendConfig) return resendConfig;
+
+  const apiKey = cleanEnv(process.env.RESEND_API_KEY);
+  const provider = cleanEnv(process.env.EMAIL_PROVIDER).toLowerCase();
+  const enabled = Boolean(apiKey) && (!provider || provider === "resend");
+  if (!enabled) return null;
+
+  const configuredFrom = cleanEnv(process.env.RESEND_FROM) || cleanEnv(process.env.EMAIL_FROM);
+  const fallbackFrom = cleanEnv(process.env.EMAIL_USER);
+  const from = looksLikeEmail(configuredFrom)
+    ? configuredFrom
+    : looksLikeEmail(fallbackFrom)
+      ? fallbackFrom
+      : "";
+
+  if (!from) {
+    throw new Error("Resend is enabled but RESEND_FROM is missing or invalid.");
+  }
+
+  resendConfig = { apiKey, from };
+  return resendConfig;
+};
+
+const sendMailWithResend = async ({ to, subject, text, html }) => {
+  const config = getResendConfig();
+  if (!config) return null;
+
+  const recipients = Array.isArray(to) ? to : [to];
+  const response = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${config.apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      from: config.from,
+      to: recipients,
+      subject,
+      html,
+      text,
+    }),
+  });
+
+  const body = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    const error = new Error(body?.message || `Resend failed with status ${response.status}`);
+    error.code = "RESEND_ERROR";
+    error.responseCode = response.status;
+    error.response = body;
+    error.smtpContext = {
+      provider: "resend",
+      from: config.from,
+    };
+    throw error;
+  }
+
+  return body;
+};
+
 export const sendMail = async ({ to, subject, text, html }) => {
+  const resend = getResendConfig();
+  if (resend) {
+    return sendMailWithResend({ to, subject, text, html });
+  }
+
   const config = getMailConfig();
   const smtp = getTransporter();
 
