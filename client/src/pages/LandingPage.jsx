@@ -1318,7 +1318,7 @@ export default function LandingPage() {
           </div>
 
           <div className="mt-8 flex flex-wrap items-center justify-between gap-3 border-t border-white/10 pt-6 text-xs text-slate-500">
-            <p>Goldchain.com</p>
+            <p>Goldchainfx.xyz</p>
             <p>
               (c) {new Date().getFullYear()} Goldchain. All rights reserved.
             </p>
@@ -1330,4 +1330,3 @@ export default function LandingPage() {
     </div>
   );
 }
-
