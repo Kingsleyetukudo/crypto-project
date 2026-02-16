@@ -6,7 +6,7 @@ import Investment from "../models/Investment.js";
 import Transaction from "../models/Transaction.js";
 import RegistrationOtp from "../models/RegistrationOtp.js";
 import PasswordChangeOtp from "../models/PasswordChangeOtp.js";
-import { sendMail } from "../utils/mailer.js";
+import { sendAdminEventNotification, sendOtpMail } from "../utils/mailer.js";
 
 const OTP_TTL_MS = 10 * 60 * 1000;
 const isProduction = process.env.NODE_ENV === "production";
@@ -40,11 +40,11 @@ export const sendRegistrationOtp = async (req, res) => {
     );
 
     try {
-      await sendMail({
+      await sendOtpMail({
         to: normalizedEmail,
-        subject: "Your registration OTP",
-        text: `Your OTP code is ${otp}. It expires in 10 minutes.`,
-        html: `<p>Your OTP code is <strong>${otp}</strong>. It expires in 10 minutes.</p>`,
+        otp,
+        purpose: "registration",
+        expiresMinutes: 10,
       });
       return res.json({ message: "Registration OTP sent to email" });
     } catch (mailError) {
@@ -103,6 +103,18 @@ export const register = async (req, res) => {
     });
     const token = signToken(user);
     await RegistrationOtp.deleteOne({ email: normalizedEmail });
+
+    await sendAdminEventNotification({
+      subject: "New user signup",
+      title: "New User Signup",
+      intro: "A new user account has been created.",
+      rows: [
+        { label: "Name", value: user.name },
+        { label: "Email", value: user.email },
+        { label: "Country", value: user.country || "-" },
+        { label: "Currency", value: user.currency || "-" },
+      ],
+    });
 
     return res.status(201).json({
       token,
@@ -175,11 +187,11 @@ export const forgotPassword = async (req, res) => {
     user.resetOtpExpiresAt = expiresAt;
     await user.save();
 
-    await sendMail({
+    await sendOtpMail({
       to: user.email,
-      subject: "Your password reset OTP",
-      text: `Your OTP code is ${otp}. It expires in 10 minutes.`,
-      html: `<p>Your OTP code is <strong>${otp}</strong>. It expires in 10 minutes.</p>`,
+      otp,
+      purpose: "password reset",
+      expiresMinutes: 10,
     });
 
     return res.json({ message: "OTP sent to email" });
@@ -251,15 +263,37 @@ export const getProfile = async (req, res) => {
       userId: req.user._id,
       status: "active",
     });
+    const activeInvestmentRows = await Investment.find({
+      userId: req.user._id,
+      status: "active",
+    }).select("amount roi");
+    const totalActiveInvestment = activeInvestmentRows.reduce(
+      (sum, row) => sum + (Number(row.amount) || 0),
+      0,
+    );
+    const avgApy = activeInvestmentRows.length
+      ? activeInvestmentRows.reduce((sum, row) => sum + (Number(row.roi) || 0), 0)
+        / activeInvestmentRows.length
+      : 0;
     const profitTx = await Transaction.find({
       userId: req.user._id,
       type: "profit",
       status: "completed",
     });
+    const depositTx = await Transaction.find({
+      userId: req.user._id,
+      type: "deposit",
+      status: "completed",
+    }).select("amount");
     const totalProfit = profitTx.reduce(
       (sum, tx) => sum + (Number(tx.amount) || 0),
       0,
     );
+    const totalDeposits = depositTx.reduce(
+      (sum, tx) => sum + (Number(tx.amount) || 0),
+      0,
+    );
+    const totalAssets = Number(user.balance || 0) + totalActiveInvestment;
 
     return res.json({
       id: user._id,
@@ -273,6 +307,10 @@ export const getProfile = async (req, res) => {
       currency: user.currency,
       activeInvestments,
       totalProfit,
+      totalDeposits,
+      totalActiveInvestment,
+      totalAssets,
+      apy: avgApy,
     });
   } catch (error) {
     return res.status(500).json({ message: "Failed to fetch profile" });
@@ -402,11 +440,11 @@ export const requestPasswordChangeOtp = async (req, res) => {
       { upsert: true, returnDocument: "after", setDefaultsOnInsert: true },
     );
 
-    await sendMail({
+    await sendOtpMail({
       to: user.email,
-      subject: "Your password change OTP",
-      text: `Your OTP code is ${otp}. It expires in 10 minutes.`,
-      html: `<p>Your OTP code is <strong>${otp}</strong>. It expires in 10 minutes.</p>`,
+      otp,
+      purpose: "password change",
+      expiresMinutes: 10,
     });
 
     return res.json({ message: "Password change OTP sent to email" });

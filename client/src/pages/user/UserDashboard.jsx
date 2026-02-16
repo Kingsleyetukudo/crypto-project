@@ -236,12 +236,10 @@ export default function UserDashboard() {
     };
   }, [activeRange, activeSymbol]);
 
-  const activeInvestments = profile?.activeInvestments ?? 0;
-  const totalProfit =
-    profile?.totalProfit ??
-    transactions
-      .filter((tx) => tx.type === "profit" && tx.status === "completed")
-      .reduce((sum, tx) => sum + (Number(tx.amount) || 0), 0);
+  const totalAssets = Number(profile?.totalAssets ?? profile?.balance ?? 0);
+  const totalDeposits = Number(profile?.totalDeposits ?? 0);
+  const totalBalance = Number(profile?.balance ?? 0);
+  const apy = Number(profile?.apy ?? 0);
 
   const tableRows = transactions.map((tx) => ({
     id: tx._id || tx.id,
@@ -343,10 +341,10 @@ export default function UserDashboard() {
               <Coins className="h-4 w-4" />
             </div>
             <p className="mt-4 text-2xl font-semibold">
-              ${profile?.balance?.toLocaleString?.() ?? "0"}
+              ${totalAssets.toLocaleString()}
             </p>
             <p className="mt-1 text-xs text-amber-900/70">
-              {loading ? "Loading..." : "Across all wallets"}
+              {loading ? "Loading..." : "Wallet + active investments"}
             </p>
           </div>
           <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
@@ -355,7 +353,7 @@ export default function UserDashboard() {
               <Wallet className="h-4 w-4 text-amber-300" />
             </div>
             <p className="mt-4 text-2xl font-semibold text-white">
-              ${Math.max(0, (profile?.balance || 0) + 0).toLocaleString()}
+              ${totalDeposits.toLocaleString()}
             </p>
             <p className="mt-1 text-xs text-slate-500">All time</p>
           </div>
@@ -365,7 +363,7 @@ export default function UserDashboard() {
               <Sparkles className="h-4 w-4 text-amber-300" />
             </div>
             <p className="mt-4 text-2xl font-semibold text-white">
-              +{activeInvestments ? "8.6" : "0.0"}%
+              +{apy.toFixed(2)}%
             </p>
             <p className="mt-1 text-xs text-slate-500">Avg. yield</p>
           </div>
@@ -581,7 +579,7 @@ export default function UserDashboard() {
               Total Balance
             </p>
             <p className="mt-2 text-2xl font-semibold text-white">
-              ${profile?.balance?.toLocaleString?.() ?? "0"}
+              ${totalBalance.toLocaleString()}
             </p>
           </div>
         </div>

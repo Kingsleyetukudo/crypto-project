@@ -20,6 +20,7 @@ import api from "../api/axios.js";
 import profileAvatar from "../assets/profile-avatar.png";
 import Logo from "../assets/new-logo-used.png";
 import FloatingChatWidget from "../components/FloatingChatWidget.jsx";
+import InvestmentActivityPopup from "../components/InvestmentActivityPopup.jsx";
 
 const normalizeWallets = (data) => {
   if (Array.isArray(data?.items)) return data.items;
@@ -317,6 +318,7 @@ export default function UserLayout({ children }) {
         </div>
       </div>
 
+      <InvestmentActivityPopup />
       <FloatingChatWidget />
     </div>
   );

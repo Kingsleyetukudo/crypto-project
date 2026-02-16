@@ -3,6 +3,15 @@ import { Check, Loader2, Plus, Trash2, X } from "lucide-react";
 import api from "../../api/axios.js";
 import Pagination from "../../components/Pagination.jsx";
 
+const emptyForm = {
+  name: "",
+  roi: "",
+  durationDays: "",
+  minAmount: "",
+  maxAmount: "",
+  details: ["", "", "", "", "", ""],
+};
+
 export default function Investments() {
   const [plans, setPlans] = React.useState([]);
   const [investments, setInvestments] = React.useState([]);
@@ -13,11 +22,7 @@ export default function Investments() {
   const [showModal, setShowModal] = React.useState(false);
   const [editId, setEditId] = React.useState(null);
   const [menuId, setMenuId] = React.useState(null);
-  const [form, setForm] = React.useState({
-    name: "",
-    roi: "",
-    durationDays: "",
-  });
+  const [form, setForm] = React.useState(emptyForm);
   const [plansPage, setPlansPage] = React.useState(1);
   const [plansLimit, setPlansLimit] = React.useState(10);
   const [plansTotal, setPlansTotal] = React.useState(0);
@@ -69,7 +74,7 @@ export default function Investments() {
   };
 
   const resetForm = () => {
-    setForm({ name: "", roi: "", durationDays: "" });
+    setForm(emptyForm);
     setEditId(null);
   };
 
@@ -81,9 +86,12 @@ export default function Investments() {
   const openEdit = (plan) => {
     setEditId(plan._id);
     setForm({
-      name: plan.name,
-      roi: plan.roi,
-      durationDays: plan.durationDays,
+      name: plan.name || "",
+      roi: plan.roi ?? "",
+      durationDays: plan.durationDays ?? "",
+      minAmount: plan.minAmount ?? "",
+      maxAmount: plan.maxAmount ?? "",
+      details: Array.from({ length: 6 }, (_, idx) => plan.details?.[idx] || ""),
     });
     setShowModal(true);
     setMenuId(null);
@@ -92,25 +100,38 @@ export default function Investments() {
   const handleSubmit = async (event) => {
     event.preventDefault();
     setError("");
+
     if (!form.name || !form.roi || !form.durationDays) {
       setError("Plan name, ROI, and duration are required.");
       return;
     }
+    if (Number(form.minAmount || 0) < 0 || Number(form.maxAmount || 0) < 0) {
+      setError("Min and max amount must be positive.");
+      return;
+    }
+    if (Number(form.maxAmount || 0) > 0 && Number(form.maxAmount || 0) < Number(form.minAmount || 0)) {
+      setError("Max amount must be greater than min amount.");
+      return;
+    }
+
+    const payload = {
+      name: form.name,
+      roi: Number(form.roi),
+      durationDays: Number(form.durationDays),
+      minAmount: Number(form.minAmount || 0),
+      maxAmount: Number(form.maxAmount || 0),
+      details: (form.details || [])
+        .map((item) => String(item || "").trim())
+        .filter(Boolean)
+        .slice(0, 6),
+    };
 
     setSaving(true);
     try {
       if (editId) {
-        await api.patch(`/admin/investment-plans/${editId}`, {
-          name: form.name,
-          roi: Number(form.roi),
-          durationDays: Number(form.durationDays),
-        });
+        await api.patch(`/admin/investment-plans/${editId}`, payload);
       } else {
-        await api.post("/admin/investment-plans", {
-          name: form.name,
-          roi: Number(form.roi),
-          durationDays: Number(form.durationDays),
-        });
+        await api.post("/admin/investment-plans", payload);
       }
       setShowModal(false);
       resetForm();
@@ -138,9 +159,7 @@ export default function Investments() {
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <h2 className="text-2xl font-semibold text-white">Investments</h2>
-          <p className="text-sm text-slate-400">
-            Manage investment plans and review user investments.
-          </p>
+          <p className="text-sm text-slate-400">Manage investment plans and review user investments.</p>
         </div>
         <button
           onClick={openCreate}
@@ -169,18 +188,19 @@ export default function Investments() {
                 <div>
                   <p className="font-semibold text-white">{plan.name}</p>
                   <p className="text-xs text-slate-500">
-                    ROI {plan.roi}% • {plan.durationDays} days
+                    ROI {plan.roi}% | {plan.durationDays} days | Min ${Number(plan.minAmount || 0).toLocaleString()} | Max {Number(plan.maxAmount || 0) > 0 ? `$${Number(plan.maxAmount).toLocaleString()}` : "No limit"}
                   </p>
+                  {Array.isArray(plan.details) && plan.details.length > 0 && (
+                    <p className="mt-1 text-xs text-slate-400">{plan.details.slice(0, 6).join(" | ")}</p>
+                  )}
                 </div>
                 <div className="relative">
                   <button
-                    onClick={() =>
-                      setMenuId((prev) => (prev === plan._id ? null : plan._id))
-                    }
+                    onClick={() => setMenuId((prev) => (prev === plan._id ? null : plan._id))}
                     className="rounded-full border border-white/10 px-3 py-1 text-xs text-slate-300 hover:bg-white/5"
                     aria-label="Plan actions"
                   >
-                    ⋯
+                    ...
                   </button>
                   {menuId === plan._id && (
                     <div className="absolute right-0 top-10 z-10 w-40 rounded-xl border border-white/10 bg-[#0b0c0d] p-2 text-xs">
@@ -229,17 +249,12 @@ export default function Investments() {
                 className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-white/10 bg-[#101214] px-4 py-3 text-sm text-slate-200"
               >
                 <div>
-                  <p className="font-semibold text-white">
-                    {inv.planId?.name || inv.planName} • ${inv.amount}
-                  </p>
+                  <p className="font-semibold text-white">{inv.planId?.name || inv.planName} | ${inv.amount}</p>
                   <p className="text-xs text-slate-500">
-                    {inv.userId?.name || inv.userId?.email || "Unknown"} • ROI{" "}
-                    {inv.roi}% • {inv.durationDays} days
+                    {inv.userId?.name || inv.userId?.email || "Unknown"} | ROI {inv.roi}% | {inv.durationDays} days
                   </p>
                 </div>
-                <span className="text-xs uppercase tracking-[0.2em] text-slate-400">
-                  {inv.status}
-                </span>
+                <span className="text-xs uppercase tracking-[0.2em] text-slate-400">{inv.status}</span>
               </div>
             ))}
           </div>
@@ -259,9 +274,7 @@ export default function Investments() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4">
           <div className="w-full max-w-lg rounded-2xl border border-white/10 bg-[#0b0c0d] p-6 text-white">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold">
-                {editId ? "Edit Investment Plan" : "Add Investment Plan"}
-              </h3>
+              <h3 className="text-lg font-semibold">{editId ? "Edit Investment Plan" : "Add Investment Plan"}</h3>
               <button
                 onClick={() => setShowModal(false)}
                 className="rounded-full border border-white/10 p-2 text-slate-300 hover:text-white"
@@ -291,6 +304,43 @@ export default function Investments() {
                 type="number"
                 className="w-full rounded-xl border border-white/10 bg-[#101214] px-4 py-3 text-sm text-white focus:outline-none"
               />
+              <div className="grid gap-3 md:grid-cols-2">
+                <input
+                  value={form.minAmount}
+                  onChange={handleChange("minAmount")}
+                  placeholder="Min amount"
+                  type="number"
+                  className="w-full rounded-xl border border-white/10 bg-[#101214] px-4 py-3 text-sm text-white focus:outline-none"
+                />
+                <input
+                  value={form.maxAmount}
+                  onChange={handleChange("maxAmount")}
+                  placeholder="Max amount (0 = no limit)"
+                  type="number"
+                  className="w-full rounded-xl border border-white/10 bg-[#101214] px-4 py-3 text-sm text-white focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <p className="mb-2 text-xs uppercase tracking-[0.3em] text-slate-500">Plan Details (up to 6)</p>
+                <div className="grid gap-3">
+                  {form.details.map((item, idx) => (
+                    <input
+                      key={`detail-${idx + 1}`}
+                      value={item}
+                      onChange={(event) =>
+                        setForm((prev) => {
+                          const next = [...prev.details];
+                          next[idx] = event.target.value;
+                          return { ...prev, details: next };
+                        })
+                      }
+                      placeholder={`Detail ${idx + 1}`}
+                      className="w-full rounded-xl border border-white/10 bg-[#101214] px-4 py-3 text-sm text-white focus:outline-none"
+                    />
+                  ))}
+                </div>
+              </div>
 
               <div className="flex items-center gap-3">
                 <button
@@ -298,11 +348,7 @@ export default function Investments() {
                   disabled={saving}
                   className="inline-flex items-center gap-2 rounded-xl bg-amber-400 px-4 py-3 text-sm font-semibold text-slate-950 hover:bg-amber-300 disabled:cursor-not-allowed disabled:opacity-70"
                 >
-                  {saving ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <Check className="h-4 w-4" />
-                  )}
+                  {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
                   {editId ? "Update Plan" : "Create Plan"}
                 </button>
                 <button
@@ -320,4 +366,3 @@ export default function Investments() {
     </div>
   );
 }
-

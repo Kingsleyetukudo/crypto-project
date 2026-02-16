@@ -1,6 +1,10 @@
 import Transaction from "../models/Transaction.js";
 import DepositWallet from "../models/DepositWallet.js";
 import User from "../models/User.js";
+import {
+  sendAdminEventNotification,
+  sendUserEventNotification,
+} from "../utils/mailer.js";
 
 export const createDeposit = async (req, res) => {
   try {
@@ -28,6 +32,32 @@ export const createDeposit = async (req, res) => {
       walletName: wallet?.name,
       walletAddress: wallet?.address,
       asset: wallet?.asset,
+    });
+
+    void sendAdminEventNotification({
+      subject: "New deposit request",
+      title: "Deposit Request Submitted",
+      intro: "A user submitted a new deposit request.",
+      rows: [
+        { label: "User", value: req.user.email },
+        { label: "Amount", value: `${amount}` },
+        { label: "Asset", value: wallet?.asset || "-" },
+        { label: "Wallet", value: wallet?.name || "-" },
+        { label: "Status", value: "pending" },
+      ],
+    });
+
+    void sendUserEventNotification({
+      to: req.user.email,
+      subject: "Deposit request received",
+      title: "Deposit Request Received",
+      intro: "Your deposit request was received and is pending admin review.",
+      rows: [
+        { label: "Amount", value: `${amount}` },
+        { label: "Asset", value: wallet?.asset || "-" },
+        { label: "Wallet", value: wallet?.name || "-" },
+        { label: "Status", value: "pending" },
+      ],
     });
 
     return res.status(201).json(transaction);
@@ -59,6 +89,30 @@ export const createWithdraw = async (req, res) => {
       status: "pending",
       txHash,
       destinationAddress,
+    });
+
+    void sendAdminEventNotification({
+      subject: "New withdrawal request",
+      title: "Withdrawal Request Submitted",
+      intro: "A user submitted a new withdrawal request.",
+      rows: [
+        { label: "User", value: req.user.email },
+        { label: "Amount", value: `${amount}` },
+        { label: "Destination", value: destinationAddress },
+        { label: "Status", value: "pending" },
+      ],
+    });
+
+    void sendUserEventNotification({
+      to: req.user.email,
+      subject: "Withdrawal request received",
+      title: "Withdrawal Request Received",
+      intro: "Your withdrawal request was received and is pending admin review.",
+      rows: [
+        { label: "Amount", value: `${amount}` },
+        { label: "Destination", value: destinationAddress },
+        { label: "Status", value: "pending" },
+      ],
     });
 
     return res.status(201).json(transaction);

@@ -59,6 +59,16 @@ export default function Invest() {
       return;
     }
 
+    if (Number(selectedPlan.minAmount || 0) > 0 && numericAmount < Number(selectedPlan.minAmount)) {
+      setError(`Minimum amount for this plan is ${Number(selectedPlan.minAmount)}.`);
+      return;
+    }
+
+    if (Number(selectedPlan.maxAmount || 0) > 0 && numericAmount > Number(selectedPlan.maxAmount)) {
+      setError(`Maximum amount for this plan is ${Number(selectedPlan.maxAmount)}.`);
+      return;
+    }
+
     setLoading(true);
     try {
       await api.post("/investments/create", {
@@ -82,29 +92,19 @@ export default function Invest() {
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
             <h1 className="text-3xl font-semibold">Choose Your Plan</h1>
-            <p className="text-sm text-slate-400">
-              Invest from your wallet balance and earn daily ROI.
-            </p>
+            <p className="text-sm text-slate-400">Invest from your wallet balance and earn daily ROI.</p>
           </div>
           <div className="rounded-2xl border border-slate-800 bg-slate-900/70 px-6 py-4">
-            <p className="text-xs uppercase tracking-[0.3em] text-slate-500">
-              Wallet Balance
-            </p>
-            <p className="text-2xl font-semibold">
-              ${balance.toLocaleString()}
-            </p>
+            <p className="text-xs uppercase tracking-[0.3em] text-slate-500">Wallet Balance</p>
+            <p className="text-2xl font-semibold">${balance.toLocaleString()}</p>
           </div>
         </div>
 
         {error && (
-          <div className="rounded-xl border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">
-            {error}
-          </div>
+          <div className="rounded-xl border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">{error}</div>
         )}
         {message && (
-          <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-200">
-            {message}
-          </div>
+          <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-200">{message}</div>
         )}
 
         <div className="grid gap-6 md:grid-cols-3">
@@ -114,14 +114,13 @@ export default function Invest() {
               className="group rounded-2xl border border-slate-800 bg-slate-900/70 p-6 transition hover:-translate-y-1 hover:border-amber-400/40"
             >
               <div className="flex items-center justify-between">
-                <span className="text-xs uppercase tracking-[0.3em] text-slate-500">
-                  {plan.name}
-                </span>
+                <span className="text-xs uppercase tracking-[0.3em] text-slate-500">{plan.name}</span>
                 <PiggyBank className="h-5 w-5 text-slate-300" />
               </div>
               <p className="mt-6 text-4xl font-semibold text-white">{plan.roi}%</p>
-              <p className="text-sm text-slate-400">
-                ROI in {plan.durationDays} days
+              <p className="text-sm text-slate-400">ROI in {plan.durationDays} days</p>
+              <p className="mt-2 text-xs text-slate-400">
+                Min ${Number(plan.minAmount || 0).toLocaleString()} | Max {Number(plan.maxAmount || 0) > 0 ? `$${Number(plan.maxAmount).toLocaleString()}` : "No limit"}
               </p>
               <div className="mt-6 space-y-3 text-xs text-slate-400">
                 <div className="flex items-center gap-2">
@@ -132,6 +131,12 @@ export default function Invest() {
                   <Sparkles className="h-4 w-4 text-amber-400" />
                   Auto-compounded
                 </div>
+                {(Array.isArray(plan.details) ? plan.details : []).slice(0, 6).map((detail, idx) => (
+                  <div key={`${plan._id}-detail-${idx}`} className="flex items-center gap-2">
+                    <Sparkles className="h-4 w-4 text-amber-400" />
+                    {detail}
+                  </div>
+                ))}
               </div>
               <button
                 disabled={loading}
@@ -142,9 +147,7 @@ export default function Invest() {
               </button>
             </div>
           ))}
-          {plans.length === 0 && (
-            <p className="text-sm text-slate-400">No investment plans available.</p>
-          )}
+          {plans.length === 0 && <p className="text-sm text-slate-400">No investment plans available.</p>}
         </div>
         <Pagination
           total={total}
@@ -160,9 +163,7 @@ export default function Invest() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4">
           <div className="w-full max-w-md rounded-2xl border border-white/10 bg-[#0b0c0d] p-6 text-white">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold">
-                Invest in {selectedPlan.name}
-              </h3>
+              <h3 className="text-lg font-semibold">Invest in {selectedPlan.name}</h3>
               <button
                 onClick={() => setSelectedPlan(null)}
                 className="rounded-full border border-white/10 px-3 py-1 text-xs text-slate-300 hover:text-white"
@@ -171,12 +172,10 @@ export default function Invest() {
               </button>
             </div>
             <p className="mt-2 text-sm text-slate-400">
-              ROI {selectedPlan.roi}% • {selectedPlan.durationDays} days
+              ROI {selectedPlan.roi}% | {selectedPlan.durationDays} days | Min ${Number(selectedPlan.minAmount || 0).toLocaleString()} | Max {Number(selectedPlan.maxAmount || 0) > 0 ? `$${Number(selectedPlan.maxAmount).toLocaleString()}` : "No limit"}
             </p>
             <div className="mt-6">
-              <label className="text-xs uppercase tracking-[0.3em] text-slate-500">
-                Amount
-              </label>
+              <label className="text-xs uppercase tracking-[0.3em] text-slate-500">Amount</label>
               <input
                 value={amount}
                 onChange={(event) => setAmount(event.target.value)}
@@ -200,4 +199,3 @@ export default function Invest() {
     </div>
   );
 }
-

@@ -3,6 +3,10 @@ import User from "../models/User.js";
 import DepositWallet from "../models/DepositWallet.js";
 import Investment from "../models/Investment.js";
 import InvestmentPlan from "../models/InvestmentPlan.js";
+import {
+  sendAdminEventNotification,
+  sendUserEventNotification,
+} from "../utils/mailer.js";
 
 export const getPendingTransactions = async (req, res) => {
   try {
@@ -81,6 +85,37 @@ const processTransactionStatusChange = async (transactionId, status) => {
 export const approveTransaction = async (req, res) => {
   try {
     const result = await processTransactionStatusChange(req.params.id, req.body.status);
+    if (result.code === 200 && result.payload?.userId) {
+      const user = await User.findById(result.payload.userId).select("email");
+      const tx = result.payload;
+      const decision = tx.status === "completed" ? "approved" : "rejected";
+
+      void sendAdminEventNotification({
+        subject: `${tx.type} ${decision}`,
+        title: "Transaction Status Updated",
+        intro: `An admin ${decision} a ${tx.type} transaction.`,
+        rows: [
+          { label: "Type", value: tx.type },
+          { label: "Amount", value: `${tx.amount}` },
+          { label: "Status", value: tx.status },
+          { label: "User", value: user?.email || String(tx.userId) },
+        ],
+      });
+
+      if (user?.email) {
+        void sendUserEventNotification({
+          to: user.email,
+          subject: `Your ${tx.type} was ${decision}`,
+          title: `${tx.type === "deposit" ? "Deposit" : "Withdrawal"} ${decision}`,
+          intro: `Your ${tx.type} request has been ${decision}.`,
+          rows: [
+            { label: "Amount", value: `${tx.amount}` },
+            { label: "Status", value: tx.status },
+            { label: "Reference", value: tx.txHash || tx._id },
+          ],
+        });
+      }
+    }
     return res.status(result.code).json(result.payload);
   } catch (error) {
     return res.status(500).json({ message: "Failed to update transaction" });
@@ -90,6 +125,37 @@ export const approveTransaction = async (req, res) => {
 export const updateTransaction = async (req, res) => {
   try {
     const result = await processTransactionStatusChange(req.params.id, req.body.status);
+    if (result.code === 200 && result.payload?.userId) {
+      const user = await User.findById(result.payload.userId).select("email");
+      const tx = result.payload;
+      const decision = tx.status === "completed" ? "approved" : "rejected";
+
+      void sendAdminEventNotification({
+        subject: `${tx.type} ${decision}`,
+        title: "Transaction Status Updated",
+        intro: `An admin ${decision} a ${tx.type} transaction.`,
+        rows: [
+          { label: "Type", value: tx.type },
+          { label: "Amount", value: `${tx.amount}` },
+          { label: "Status", value: tx.status },
+          { label: "User", value: user?.email || String(tx.userId) },
+        ],
+      });
+
+      if (user?.email) {
+        void sendUserEventNotification({
+          to: user.email,
+          subject: `Your ${tx.type} was ${decision}`,
+          title: `${tx.type === "deposit" ? "Deposit" : "Withdrawal"} ${decision}`,
+          intro: `Your ${tx.type} request has been ${decision}.`,
+          rows: [
+            { label: "Amount", value: `${tx.amount}` },
+            { label: "Status", value: tx.status },
+            { label: "Reference", value: tx.txHash || tx._id },
+          ],
+        });
+      }
+    }
     return res.status(result.code).json(result.payload);
   } catch (error) {
     return res.status(500).json({ message: "Failed to update transaction" });
@@ -124,6 +190,20 @@ export const createAdminWallet = async (req, res) => {
       network,
       isActive: true,
     });
+
+    void sendAdminEventNotification({
+      subject: "New deposit wallet added",
+      title: "Wallet Added",
+      intro: "An admin added a new deposit wallet.",
+      rows: [
+        { label: "Name", value: wallet.name },
+        { label: "Asset", value: wallet.asset },
+        { label: "Network", value: wallet.network || "-" },
+        { label: "Address", value: wallet.address },
+        { label: "Active", value: wallet.isActive ? "yes" : "no" },
+      ],
+    });
+
     return res.status(201).json(wallet);
   } catch (error) {
     return res.status(500).json({ message: "Failed to create wallet" });
@@ -132,15 +212,35 @@ export const createAdminWallet = async (req, res) => {
 
 export const updateAdminWallet = async (req, res) => {
   try {
-    const { isActive } = req.body;
-    const wallet = await DepositWallet.findByIdAndUpdate(
-      req.params.id,
-      { isActive },
-      { returnDocument: "after" },
-    );
-    if (!wallet) {
+    const current = await DepositWallet.findById(req.params.id);
+    if (!current) {
       return res.status(404).json({ message: "Wallet not found" });
     }
+
+    const { name, address, asset, network, isActive } = req.body;
+    const update = { name, address, asset, network, isActive };
+    Object.keys(update).forEach((key) => update[key] === undefined && delete update[key]);
+
+    const wallet = await DepositWallet.findByIdAndUpdate(
+      req.params.id,
+      update,
+      { returnDocument: "after" },
+    );
+
+    void sendAdminEventNotification({
+      subject: "Deposit wallet updated",
+      title: "Wallet Updated",
+      intro: "An admin updated a deposit wallet.",
+      rows: [
+        { label: "Name", value: wallet.name },
+        { label: "Asset", value: wallet.asset },
+        { label: "Network", value: wallet.network || "-" },
+        { label: "Address", value: wallet.address },
+        { label: "Active", value: wallet.isActive ? "yes" : "no" },
+        { label: "Previous Address", value: current.address },
+      ],
+    });
+
     return res.json(wallet);
   } catch (error) {
     return res.status(500).json({ message: "Failed to update wallet" });
@@ -178,14 +278,30 @@ export const getInvestmentPlans = async (req, res) => {
 
 export const createInvestmentPlan = async (req, res) => {
   try {
-    const { name, roi, durationDays } = req.body;
+    const { name, roi, durationDays, minAmount, maxAmount, details } = req.body;
     if (!name || !roi || !durationDays) {
       return res.status(400).json({ message: "Missing plan details" });
     }
+    const parsedMin = Number(minAmount || 0);
+    const parsedMax = Number(maxAmount || 0);
+    if (parsedMin < 0 || parsedMax < 0) {
+      return res.status(400).json({ message: "Min and max amounts must be positive" });
+    }
+    if (parsedMax > 0 && parsedMax < parsedMin) {
+      return res.status(400).json({ message: "Max amount must be greater than min amount" });
+    }
+
+    const normalizedDetails = Array.isArray(details)
+      ? details.map((item) => String(item || "").trim()).filter(Boolean).slice(0, 6)
+      : [];
+
     const plan = await InvestmentPlan.create({
       name,
       roi,
       durationDays,
+      minAmount: parsedMin,
+      maxAmount: parsedMax,
+      details: normalizedDetails,
       isActive: true,
     });
     return res.status(201).json(plan);
@@ -196,16 +312,35 @@ export const createInvestmentPlan = async (req, res) => {
 
 export const updateInvestmentPlan = async (req, res) => {
   try {
-    const { name, roi, durationDays, isActive } = req.body;
-    const update = { name, roi, durationDays, isActive };
+    const { name, roi, durationDays, minAmount, maxAmount, details, isActive } = req.body;
+    const update = { name, roi, durationDays, minAmount, maxAmount, isActive };
     Object.keys(update).forEach((key) => update[key] === undefined && delete update[key]);
+
+    const existingPlan = await InvestmentPlan.findById(req.params.id);
+    if (!existingPlan) {
+      return res.status(404).json({ message: "Plan not found" });
+    }
+
+    if (update.minAmount !== undefined) update.minAmount = Number(update.minAmount);
+    if (update.maxAmount !== undefined) update.maxAmount = Number(update.maxAmount);
+    if ((update.minAmount ?? 0) < 0 || (update.maxAmount ?? 0) < 0) {
+      return res.status(400).json({ message: "Min and max amounts must be positive" });
+    }
+    const effectiveMin = update.minAmount ?? Number(existingPlan.minAmount || 0);
+    const effectiveMax = update.maxAmount ?? Number(existingPlan.maxAmount || 0);
+    if (effectiveMax > 0 && effectiveMax < effectiveMin) {
+      return res.status(400).json({ message: "Max amount must be greater than min amount" });
+    }
+
+    if (details !== undefined) {
+      update.details = Array.isArray(details)
+        ? details.map((item) => String(item || "").trim()).filter(Boolean).slice(0, 6)
+        : [];
+    }
 
     const plan = await InvestmentPlan.findByIdAndUpdate(req.params.id, update, {
       returnDocument: "after",
     });
-    if (!plan) {
-      return res.status(404).json({ message: "Plan not found" });
-    }
     return res.json(plan);
   } catch (error) {
     return res.status(500).json({ message: "Failed to update plan" });
@@ -296,6 +431,36 @@ export const createAdminInvestment = async (req, res) => {
       endDate,
       status: "active",
     });
+
+    const user = await User.findById(userId).select("email");
+    void sendAdminEventNotification({
+      subject: "Admin investment created",
+      title: "Investment Added By Admin",
+      intro: "An admin created an investment entry.",
+      rows: [
+        { label: "User", value: user?.email || userId },
+        { label: "Plan", value: planName },
+        { label: "Amount", value: `${amount}` },
+        { label: "ROI", value: `${roi}%` },
+        { label: "Duration", value: `${durationDays} days` },
+      ],
+    });
+
+    if (user?.email) {
+      void sendUserEventNotification({
+        to: user.email,
+        subject: "A new investment was added to your account",
+        title: "Investment Added",
+        intro: "An investment was added to your account by admin.",
+        rows: [
+          { label: "Plan", value: planName },
+          { label: "Amount", value: `${amount}` },
+          { label: "ROI", value: `${roi}%` },
+          { label: "Duration", value: `${durationDays} days` },
+        ],
+      });
+    }
+
     return res.status(201).json(investment);
   } catch (error) {
     return res.status(500).json({ message: "Failed to create investment" });

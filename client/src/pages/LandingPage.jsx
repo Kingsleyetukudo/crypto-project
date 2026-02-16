@@ -32,6 +32,7 @@ import teamSophia from "../assets/team-2.jpg";
 import teamMichael from "../assets/team-3.jpg";
 import api from "../api/axios.js";
 import MarketTickerBar from "../components/MarketTickerBar.jsx";
+import InvestmentActivityPopup from "../components/InvestmentActivityPopup.jsx";
 
 const navItems = [
   { href: "#about", label: "About" },
@@ -740,9 +741,21 @@ export default function LandingPage() {
                   </h4>
                   <div className="mt-3 space-y-2 text-sm text-slate-300">
                     <p>Min Amount: ${plan?.minAmount ?? 100}</p>
-                    <p>Max Amount: ${plan?.maxAmount ?? 10000}</p>
+                    <p>
+                      Max Amount:{" "}
+                      {Number(plan?.maxAmount ?? 10000) > 0
+                        ? `$${plan?.maxAmount ?? 10000}`
+                        : "No limit"}
+                    </p>
                     <p>Duration: {plan?.durationDays ?? 30} days</p>
                     <p>ROI: {plan?.dailyRoi ?? plan?.roi ?? "1.8% daily"}</p>
+                    {(Array.isArray(plan?.details) ? plan.details : [])
+                      .slice(0, 6)
+                      .map((detail, detailIndex) => (
+                        <p key={`${plan?._id || index}-detail-${detailIndex}`}>
+                          - {detail}
+                        </p>
+                      ))}
                   </div>
                 </article>
               ))}
@@ -1179,7 +1192,12 @@ export default function LandingPage() {
               <div className="space-y-8">
                 <div className="flex items-center gap-3 rounded-xl border border-white/10 bg-slate-800/70 px-3 py-3 text-sm text-slate-200">
                   <Mail className="h-4 w-4 text-amber-300" />
-                  goldchainchain121@gmail.com
+                  <a
+                    href="mailto:goldchainchain121@gmail.com"
+                    className="hover:text-amber-300"
+                  >
+                    goldchainchain121@gmail.com
+                  </a>
                 </div>
                 <div className="flex items-center gap-3 rounded-xl border border-white/10 bg-slate-800/70 px-3 py-3 text-sm text-slate-200">
                   <Phone className="h-4 w-4 text-amber-300" />
@@ -1306,6 +1324,7 @@ export default function LandingPage() {
           </div>
         </div>
       </footer>
+      <InvestmentActivityPopup />
     </div>
   );
 }
