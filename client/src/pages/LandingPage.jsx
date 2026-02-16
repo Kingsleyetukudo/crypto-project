@@ -33,6 +33,7 @@ import teamMichael from "../assets/team-3.jpg";
 import api from "../api/axios.js";
 import MarketTickerBar from "../components/MarketTickerBar.jsx";
 import InvestmentActivityPopup from "../components/InvestmentActivityPopup.jsx";
+import FloatingChatWidget from "../components/FloatingChatWidget.jsx";
 
 const navItems = [
   { href: "#about", label: "About" },
@@ -1325,6 +1326,7 @@ export default function LandingPage() {
         </div>
       </footer>
       <InvestmentActivityPopup />
+      <FloatingChatWidget />
     </div>
   );
 }
