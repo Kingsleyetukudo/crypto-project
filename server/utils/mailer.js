@@ -54,13 +54,24 @@ export const sendMail = async ({ to, subject, text, html }) => {
   const config = getMailConfig();
   const smtp = getTransporter();
 
-  return smtp.sendMail({
-    from: config.from,
-    to,
-    subject,
-    text,
-    html,
-  });
+  try {
+    return await smtp.sendMail({
+      from: config.from,
+      to,
+      subject,
+      text,
+      html,
+    });
+  } catch (error) {
+    error.smtpContext = {
+      host: config.host,
+      port: config.port,
+      secure: config.secure,
+      user: config.user,
+      from: config.from,
+    };
+    throw error;
+  }
 };
 
 const toAdminRecipients = () => {

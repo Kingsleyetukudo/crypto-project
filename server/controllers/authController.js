@@ -48,7 +48,22 @@ export const sendRegistrationOtp = async (req, res) => {
       });
       return res.json({ message: "Registration OTP sent to email" });
     } catch (mailError) {
+      console.error("[mail] registration otp send failed:", {
+        message: mailError?.message,
+        code: mailError?.code,
+        command: mailError?.command,
+        response: mailError?.response,
+        responseCode: mailError?.responseCode,
+        smtpContext: mailError?.smtpContext,
+      });
+
       if (isProduction) {
+        if (String(process.env.EXPOSE_SMTP_ERROR || "").toLowerCase() === "true") {
+          return res.status(500).json({
+            message: "Failed to send registration OTP",
+            smtpError: mailError?.message || "Unknown SMTP error",
+          });
+        }
         return res.status(500).json({ message: "Failed to send registration OTP" });
       }
       return res.json({
