@@ -1,15 +1,22 @@
 import React from "react";
 import { Eye, EyeOff, Lock, Mail } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import api from "../../api/axios.js";
 import Logo from "../../assets/Goldchain-logo.png";
 
 export default function Login() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [showPassword, setShowPassword] = React.useState(false);
   const [form, setForm] = React.useState({ email: "", password: "" });
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState("");
+  const [sessionExpired, setSessionExpired] = React.useState(false);
+
+  React.useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    setSessionExpired(params.get("expired") === "1");
+  }, [location.search]);
 
   const handleChange = (key) => (event) => {
     setForm((prev) => ({ ...prev, [key]: event.target.value }));
@@ -63,6 +70,11 @@ export default function Login() {
             <p className="mt-2 text-sm text-slate-400">
               Enter your credentials to continue.
             </p>
+            {sessionExpired && (
+              <p className="mt-3 rounded-lg border border-amber-400/40 bg-amber-500/10 px-3 py-2 text-xs text-amber-300">
+                Session expired due to inactivity. Please sign in again.
+              </p>
+            )}
 
             <form onSubmit={handleSubmit} className="mt-6 space-y-5">
               <div>

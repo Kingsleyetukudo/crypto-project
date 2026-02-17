@@ -47,6 +47,8 @@ const bottomItems = [
   { to: "/settings", label: "Settings", icon: Settings },
 ];
 
+const IDLE_TIMEOUT_MS = 60 * 60 * 1000;
+
 export default function UserLayout({ children }) {
   const location = useLocation();
   const navigate = useNavigate();
@@ -101,10 +103,40 @@ export default function UserLayout({ children }) {
     ? `${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}`
     : "No wallet address";
 
-  const handleLogout = () => {
+  const handleLogout = React.useCallback((reason = "manual") => {
     localStorage.removeItem("token");
-    navigate("/login");
-  };
+    navigate(reason === "idle" ? "/login?expired=1" : "/login");
+  }, [navigate]);
+
+  React.useEffect(() => {
+    let timeoutId;
+    const activityEvents = [
+      "mousemove",
+      "keydown",
+      "click",
+      "scroll",
+      "touchstart",
+    ];
+
+    const resetTimer = () => {
+      if (timeoutId) clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        handleLogout("idle");
+      }, IDLE_TIMEOUT_MS);
+    };
+
+    resetTimer();
+    activityEvents.forEach((eventName) => {
+      window.addEventListener(eventName, resetTimer, { passive: true });
+    });
+
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId);
+      activityEvents.forEach((eventName) => {
+        window.removeEventListener(eventName, resetTimer);
+      });
+    };
+  }, [handleLogout]);
 
   return (
     <div className="h-screen overflow-hidden bg-[#0b0c0d] text-white">

@@ -4,6 +4,7 @@ import Pagination from "../../components/Pagination.jsx";
 
 export default function Withdraw() {
   const [amount, setAmount] = React.useState("");
+  const [destinationNetwork, setDestinationNetwork] = React.useState("");
   const [destinationAddress, setDestinationAddress] = React.useState("");
   const [loading, setLoading] = React.useState(false);
   const [message, setMessage] = React.useState("");
@@ -47,10 +48,12 @@ export default function Withdraw() {
     try {
       await api.post("/transactions/withdraw", {
         amount: Number(amount),
+        destinationNetwork,
         destinationAddress,
       });
       setMessage("Withdrawal request submitted.");
       setAmount("");
+      setDestinationNetwork("");
       setDestinationAddress("");
       setPage(1);
       await loadHistory();
@@ -90,6 +93,17 @@ export default function Withdraw() {
         </div>
         <div>
           <label className="text-xs uppercase tracking-[0.3em] text-slate-500">
+            Network Type
+          </label>
+          <input
+            value={destinationNetwork}
+            onChange={(event) => setDestinationNetwork(event.target.value)}
+            placeholder="e.g. TRC20, ERC20, BEP20"
+            className="mt-2 w-full rounded-xl border border-white/10 bg-[#0b0c0d] px-4 py-3 text-sm text-white focus:outline-none"
+          />
+        </div>
+        <div>
+          <label className="text-xs uppercase tracking-[0.3em] text-slate-500">
             Destination Address
           </label>
           <input
@@ -118,6 +132,7 @@ export default function Withdraw() {
               <tr>
                 <th className="px-4 py-3">Amount</th>
                 <th className="px-4 py-3">Destination</th>
+                <th className="px-4 py-3">Network</th>
                 <th className="px-4 py-3">Status</th>
                 <th className="px-4 py-3">Date</th>
               </tr>
@@ -125,7 +140,7 @@ export default function Withdraw() {
             <tbody>
               {pageRows.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="px-4 py-6 text-center text-slate-400">
+                  <td colSpan={5} className="px-4 py-6 text-center text-slate-400">
                     No withdrawals yet.
                   </td>
                 </tr>
@@ -134,13 +149,16 @@ export default function Withdraw() {
                   <tr key={tx._id} className="border-b border-white/10 last:border-none">
                     <td className="px-4 py-3">${tx.amount}</td>
                     <td className="px-4 py-3 text-slate-400">
-                      {tx.destinationAddress || "—"}
+                      {tx.destinationAddress || "-"}
+                    </td>
+                    <td className="px-4 py-3 text-slate-400">
+                      {tx.destinationNetwork || "-"}
                     </td>
                     <td className="px-4 py-3 capitalize">{tx.status}</td>
                     <td className="px-4 py-3 text-slate-400">
                       {tx.createdAt
                         ? new Date(tx.createdAt).toLocaleDateString()
-                        : "—"}
+                        : "-"}
                     </td>
                   </tr>
                 ))
@@ -161,4 +179,3 @@ export default function Withdraw() {
     </div>
   );
 }
-

@@ -85,6 +85,7 @@ const COIN_OPTIONS = [
 
 export default function UserDashboard() {
   const [showDeposit, setShowDeposit] = React.useState(false);
+  const [quickDepositAmount, setQuickDepositAmount] = React.useState("");
   const [profile, setProfile] = React.useState(null);
   const [transactions, setTransactions] = React.useState([]);
   const [transactionsPage, setTransactionsPage] = React.useState(1);
@@ -261,6 +262,14 @@ export default function UserDashboard() {
     } catch {
       setRefCopied(false);
     }
+  };
+
+  const handleQuickDeposit = () => {
+    const numericAmount = Number(quickDepositAmount);
+    if (!Number.isFinite(numericAmount) || numericAmount <= 0) {
+      return;
+    }
+    setShowDeposit(true);
   };
 
   const chartData =
@@ -643,11 +652,17 @@ export default function UserDashboard() {
           <p className="text-xs text-slate-500">Do a quick transaction</p>
           <div className="mt-4 rounded-2xl border border-white/10 bg-[#101214] px-4 py-3">
             <input
+              value={quickDepositAmount}
+              onChange={(event) => setQuickDepositAmount(event.target.value)}
               placeholder="Enter Deposit Amount"
+              type="number"
               className="w-full bg-transparent text-sm text-slate-200 placeholder:text-slate-600 focus:outline-none"
             />
           </div>
-          <button className="mt-6 w-full rounded-full bg-amber-400 px-4 py-3 text-sm font-semibold text-slate-950 hover:bg-amber-300">
+          <button
+            onClick={handleQuickDeposit}
+            className="mt-6 w-full rounded-full bg-amber-400 px-4 py-3 text-sm font-semibold text-slate-950 hover:bg-amber-300"
+          >
             Deposit
           </button>
         </div>
@@ -699,7 +714,10 @@ export default function UserDashboard() {
               <span className="font-semibold">$2,745.10</span>
             </div>
             <button
-              onClick={() => setShowDeposit(true)}
+              onClick={() => {
+                setQuickDepositAmount("");
+                setShowDeposit(true);
+              }}
               className="flex w-full items-center justify-center gap-2 rounded-xl bg-amber-400 px-4 py-3 text-sm font-semibold text-slate-950 hover:bg-amber-300"
             >
               Buy BTC
@@ -713,6 +731,7 @@ export default function UserDashboard() {
         <DepositModal
           onClose={() => setShowDeposit(false)}
           onSubmitted={refreshData}
+          initialAmount={quickDepositAmount}
         />
       )}
     </div>

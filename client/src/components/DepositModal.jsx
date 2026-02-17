@@ -9,7 +9,7 @@ const normalizeWallets = (data) => {
   return [];
 };
 
-export default function DepositModal({ onClose, onSubmitted }) {
+export default function DepositModal({ onClose, onSubmitted, initialAmount = "" }) {
   const [txHash, setTxHash] = React.useState("");
   const [amount, setAmount] = React.useState("");
   const [wallets, setWallets] = React.useState([]);
@@ -35,6 +35,12 @@ export default function DepositModal({ onClose, onSubmitted }) {
     };
     loadWallets();
   }, []);
+
+  React.useEffect(() => {
+    if (initialAmount !== undefined && initialAmount !== null && String(initialAmount).trim()) {
+      setAmount(String(initialAmount));
+    }
+  }, [initialAmount]);
 
   const selectedWallet = wallets.find((wallet) => wallet._id === walletId);
 

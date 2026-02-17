@@ -24,6 +24,7 @@ const transactionSchema = new mongoose.Schema(
     walletAddress: { type: String },
     asset: { type: String },
     destinationAddress: { type: String },
+    destinationNetwork: { type: String },
   },
   { timestamps: true },
 );

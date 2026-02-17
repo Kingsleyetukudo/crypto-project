@@ -247,6 +247,31 @@ export const updateAdminWallet = async (req, res) => {
   }
 };
 
+export const deleteAdminWallet = async (req, res) => {
+  try {
+    const wallet = await DepositWallet.findByIdAndDelete(req.params.id);
+    if (!wallet) {
+      return res.status(404).json({ message: "Wallet not found" });
+    }
+
+    void sendAdminEventNotification({
+      subject: "Deposit wallet deleted",
+      title: "Wallet Deleted",
+      intro: "An admin deleted a deposit wallet.",
+      rows: [
+        { label: "Name", value: wallet.name },
+        { label: "Asset", value: wallet.asset },
+        { label: "Network", value: wallet.network || "-" },
+        { label: "Address", value: wallet.address },
+      ],
+    });
+
+    return res.json({ message: "Wallet deleted" });
+  } catch (error) {
+    return res.status(500).json({ message: "Failed to delete wallet" });
+  }
+};
+
 export const getAdminInvestments = async (req, res) => {
   try {
     const { page, limit } = req.pagination;
@@ -304,6 +329,20 @@ export const createInvestmentPlan = async (req, res) => {
       details: normalizedDetails,
       isActive: true,
     });
+
+    void sendAdminEventNotification({
+      subject: "Investment plan created",
+      title: "Investment Plan Added",
+      intro: "An admin added a new investment plan.",
+      rows: [
+        { label: "Name", value: plan.name },
+        { label: "ROI", value: `${plan.roi}%` },
+        { label: "Duration", value: `${plan.durationDays} days` },
+        { label: "Min Amount", value: `${plan.minAmount}` },
+        { label: "Max Amount", value: `${plan.maxAmount || "No limit"}` },
+      ],
+    });
+
     return res.status(201).json(plan);
   } catch (error) {
     return res.status(500).json({ message: "Failed to create plan" });
@@ -341,6 +380,20 @@ export const updateInvestmentPlan = async (req, res) => {
     const plan = await InvestmentPlan.findByIdAndUpdate(req.params.id, update, {
       returnDocument: "after",
     });
+
+    void sendAdminEventNotification({
+      subject: "Investment plan updated",
+      title: "Investment Plan Updated",
+      intro: "An admin updated an investment plan.",
+      rows: [
+        { label: "Name", value: plan.name },
+        { label: "ROI", value: `${plan.roi}%` },
+        { label: "Duration", value: `${plan.durationDays} days` },
+        { label: "Min Amount", value: `${plan.minAmount}` },
+        { label: "Max Amount", value: `${plan.maxAmount || "No limit"}` },
+      ],
+    });
+
     return res.json(plan);
   } catch (error) {
     return res.status(500).json({ message: "Failed to update plan" });
@@ -353,6 +406,18 @@ export const deleteInvestmentPlan = async (req, res) => {
     if (!plan) {
       return res.status(404).json({ message: "Plan not found" });
     }
+
+    void sendAdminEventNotification({
+      subject: "Investment plan deleted",
+      title: "Investment Plan Deleted",
+      intro: "An admin deleted an investment plan.",
+      rows: [
+        { label: "Name", value: plan.name },
+        { label: "ROI", value: `${plan.roi}%` },
+        { label: "Duration", value: `${plan.durationDays} days` },
+      ],
+    });
+
     return res.json({ message: "Plan deleted" });
   } catch (error) {
     return res.status(500).json({ message: "Failed to delete plan" });
@@ -485,6 +550,22 @@ export const updateAdminInvestment = async (req, res) => {
     if (!investment) {
       return res.status(404).json({ message: "Investment not found" });
     }
+
+    const user = await User.findById(investment.userId).select("email");
+    void sendAdminEventNotification({
+      subject: "Admin investment updated",
+      title: "Investment Updated By Admin",
+      intro: "An admin updated an investment entry.",
+      rows: [
+        { label: "User", value: user?.email || String(investment.userId) },
+        { label: "Plan", value: investment.planName },
+        { label: "Amount", value: `${investment.amount}` },
+        { label: "ROI", value: `${investment.roi}%` },
+        { label: "Duration", value: `${investment.durationDays} days` },
+        { label: "Status", value: investment.status },
+      ],
+    });
+
     return res.json(investment);
   } catch (error) {
     return res.status(500).json({ message: "Failed to update investment" });
@@ -497,6 +578,21 @@ export const deleteAdminInvestment = async (req, res) => {
     if (!investment) {
       return res.status(404).json({ message: "Investment not found" });
     }
+
+    const user = await User.findById(investment.userId).select("email");
+    void sendAdminEventNotification({
+      subject: "Admin investment deleted",
+      title: "Investment Deleted By Admin",
+      intro: "An admin deleted an investment entry.",
+      rows: [
+        { label: "User", value: user?.email || String(investment.userId) },
+        { label: "Plan", value: investment.planName },
+        { label: "Amount", value: `${investment.amount}` },
+        { label: "ROI", value: `${investment.roi}%` },
+        { label: "Duration", value: `${investment.durationDays} days` },
+      ],
+    });
+
     return res.json({ message: "Investment deleted" });
   } catch (error) {
     return res.status(500).json({ message: "Failed to delete investment" });

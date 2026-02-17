@@ -1208,6 +1208,16 @@ export default function LandingPage() {
                   <MapPin className="h-4 w-4 text-amber-300" />
                   Austin, Texas, United States
                 </div>
+                <div className="flex items-center gap-3 rounded-xl border border-white/10 bg-slate-800/70 px-3 py-3 text-sm text-slate-200">
+                  <a
+                    href="https://t.me/Lenore3466"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-amber-200 hover:text-amber-300"
+                  >
+                    Telegram: t.me/Lenore3466
+                  </a>
+                </div>
               </div>
 
               <form className="space-y-8">

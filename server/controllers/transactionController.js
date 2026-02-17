@@ -68,7 +68,7 @@ export const createDeposit = async (req, res) => {
 
 export const createWithdraw = async (req, res) => {
   try {
-    const { amount, destinationAddress, txHash } = req.body;
+    const { amount, destinationAddress, destinationNetwork, txHash } = req.body;
 
     if (!amount || amount <= 0) {
       return res.status(400).json({ message: "Valid amount required" });
@@ -89,6 +89,7 @@ export const createWithdraw = async (req, res) => {
       status: "pending",
       txHash,
       destinationAddress,
+      destinationNetwork,
     });
 
     void sendAdminEventNotification({
@@ -99,6 +100,7 @@ export const createWithdraw = async (req, res) => {
         { label: "User", value: req.user.email },
         { label: "Amount", value: `${amount}` },
         { label: "Destination", value: destinationAddress },
+        { label: "Network", value: destinationNetwork || "-" },
         { label: "Status", value: "pending" },
       ],
     });
@@ -111,6 +113,7 @@ export const createWithdraw = async (req, res) => {
       rows: [
         { label: "Amount", value: `${amount}` },
         { label: "Destination", value: destinationAddress },
+        { label: "Network", value: destinationNetwork || "-" },
         { label: "Status", value: "pending" },
       ],
     });

@@ -1,5 +1,5 @@
 import React from "react";
-import { Check, Loader2, Plus, XCircle } from "lucide-react";
+import { Check, Loader2, Pencil, Plus, Save, Trash2, XCircle } from "lucide-react";
 import api from "../../api/axios.js";
 import Pagination from "../../components/Pagination.jsx";
 
@@ -22,6 +22,15 @@ export default function AdminDashboard() {
     asset: "",
     network: "",
   });
+  const [walletEditId, setWalletEditId] = React.useState(null);
+  const [walletEditForm, setWalletEditForm] = React.useState({
+    name: "",
+    address: "",
+    asset: "",
+    network: "",
+    isActive: true,
+  });
+  const [walletActionId, setWalletActionId] = React.useState(null);
   const [pendingPage, setPendingPage] = React.useState(1);
   const [pendingLimit, setPendingLimit] = React.useState(10);
   const [pendingTotal, setPendingTotal] = React.useState(0);
@@ -108,6 +117,49 @@ export default function AdminDashboard() {
       setWalletPage(1);
     } catch (err) {
       setError(err?.response?.data?.message || "Failed to add wallet.");
+    }
+  };
+
+  const startWalletEdit = (wallet) => {
+    setWalletEditId(wallet._id);
+    setWalletEditForm({
+      name: wallet.name || "",
+      address: wallet.address || "",
+      asset: wallet.asset || "",
+      network: wallet.network || "",
+      isActive: wallet.isActive !== false,
+    });
+  };
+
+  const handleWalletEditChange = (key) => (event) => {
+    const value = key === "isActive" ? event.target.checked : event.target.value;
+    setWalletEditForm((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const handleSaveWalletEdit = async (walletId) => {
+    setWalletActionId(walletId);
+    setError("");
+    try {
+      await api.patch(`/admin/wallets/${walletId}`, walletEditForm);
+      setWalletEditId(null);
+      await loadWallets();
+    } catch (err) {
+      setError(err?.response?.data?.message || "Failed to update wallet.");
+    } finally {
+      setWalletActionId(null);
+    }
+  };
+
+  const handleDeleteWallet = async (walletId) => {
+    setWalletActionId(walletId);
+    setError("");
+    try {
+      await api.delete(`/admin/wallets/${walletId}`);
+      await loadWallets();
+    } catch (err) {
+      setError(err?.response?.data?.message || "Failed to delete wallet.");
+    } finally {
+      setWalletActionId(null);
     }
   };
 
@@ -283,13 +335,89 @@ export default function AdminDashboard() {
                   key={wallet._id}
                   className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-slate-800 bg-slate-950/70 px-4 py-3 text-sm text-slate-200"
                 >
-                  <div>
-                    <p className="font-semibold text-white">{wallet.name}</p>
-                    <p className="text-xs text-slate-500">
-                      {wallet.asset} {wallet.network ? `• ${wallet.network}` : ""}
-                    </p>
-                  </div>
-                  <p className="text-xs text-slate-500">{wallet.address}</p>
+                  {walletEditId === wallet._id ? (
+                    <div className="grid w-full gap-3 md:grid-cols-2">
+                      <input
+                        value={walletEditForm.name}
+                        onChange={handleWalletEditChange("name")}
+                        placeholder="Wallet name"
+                        className="rounded-xl border border-slate-700 bg-slate-900/70 px-3 py-2 text-sm text-white focus:outline-none"
+                      />
+                      <input
+                        value={walletEditForm.asset}
+                        onChange={handleWalletEditChange("asset")}
+                        placeholder="Asset"
+                        className="rounded-xl border border-slate-700 bg-slate-900/70 px-3 py-2 text-sm text-white focus:outline-none"
+                      />
+                      <input
+                        value={walletEditForm.network}
+                        onChange={handleWalletEditChange("network")}
+                        placeholder="Network"
+                        className="rounded-xl border border-slate-700 bg-slate-900/70 px-3 py-2 text-sm text-white focus:outline-none"
+                      />
+                      <input
+                        value={walletEditForm.address}
+                        onChange={handleWalletEditChange("address")}
+                        placeholder="Address"
+                        className="rounded-xl border border-slate-700 bg-slate-900/70 px-3 py-2 text-sm text-white focus:outline-none"
+                      />
+                      <label className="inline-flex items-center gap-2 text-xs text-slate-300 md:col-span-2">
+                        <input
+                          type="checkbox"
+                          checked={walletEditForm.isActive}
+                          onChange={handleWalletEditChange("isActive")}
+                        />
+                        Active
+                      </label>
+                      <div className="flex gap-2 md:col-span-2">
+                        <button
+                          type="button"
+                          onClick={() => handleSaveWalletEdit(wallet._id)}
+                          disabled={walletActionId === wallet._id}
+                          className="inline-flex items-center gap-2 rounded-lg bg-amber-400 px-3 py-2 text-xs font-semibold text-slate-950 hover:bg-amber-300 disabled:opacity-70"
+                        >
+                          <Save className="h-3.5 w-3.5" />
+                          Save
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setWalletEditId(null)}
+                          className="rounded-lg border border-slate-700 px-3 py-2 text-xs text-slate-300 hover:bg-white/5"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      <div>
+                        <p className="font-semibold text-white">{wallet.name}</p>
+                        <p className="text-xs text-slate-500">
+                          {wallet.asset} {wallet.network ? `• ${wallet.network}` : ""}
+                        </p>
+                      </div>
+                      <p className="text-xs text-slate-500">{wallet.address}</p>
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => startWalletEdit(wallet)}
+                          className="inline-flex items-center gap-1 rounded-full border border-white/10 px-3 py-1 text-xs text-slate-300 hover:bg-white/5"
+                        >
+                          <Pencil className="h-3 w-3" />
+                          Edit
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteWallet(wallet._id)}
+                          disabled={walletActionId === wallet._id}
+                          className="inline-flex items-center gap-1 rounded-full border border-rose-500/70 px-3 py-1 text-xs text-rose-200 hover:bg-white/5 disabled:opacity-70"
+                        >
+                          <Trash2 className="h-3 w-3" />
+                          Delete
+                        </button>
+                      </div>
+                    </>
+                  )}
                 </div>
               ))}
               {wallets.length === 0 && (

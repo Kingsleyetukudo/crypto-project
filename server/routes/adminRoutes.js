@@ -5,6 +5,7 @@ import {
   approveTransaction,
   createAdminInvestment,
   createAdminWallet,
+  deleteAdminWallet,
   createInvestmentPlan,
   deleteAdminInvestment,
   deleteInvestmentPlan,
@@ -32,6 +33,7 @@ router.patch("/transactions/:id", protect, adminOnly, updateTransaction);
 router.get("/wallets", protect, adminOnly, withPagination(), getAdminWallets);
 router.post("/wallets", protect, adminOnly, createAdminWallet);
 router.patch("/wallets/:id", protect, adminOnly, updateAdminWallet);
+router.delete("/wallets/:id", protect, adminOnly, deleteAdminWallet);
 
 router.get("/investments", protect, adminOnly, withPagination(), getAdminInvestments);
 router.post("/investments", protect, adminOnly, createAdminInvestment);

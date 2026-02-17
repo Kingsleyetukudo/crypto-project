@@ -61,7 +61,7 @@ export default function MarketTickerBar() {
 
   if (!items.length) {
     return (
-      <div className="w-full max-w-full overflow-hidden rounded-2xl border border-white/10 bg-[#0f1216] px-4 py-3 text-sm text-slate-300">
+      <div className="w-full max-w-full overflow-hidden  bg-[#0f1216] px-4 py-3 text-sm text-slate-300">
         {status === "loading"
           ? "Loading market prices..."
           : "Market data unavailable. Check your API connection."}
@@ -72,7 +72,7 @@ export default function MarketTickerBar() {
   const scrollingItems = [...items, ...items];
 
   return (
-    <div className="w-full max-w-full overflow-hidden rounded-2xl border border-white/10 bg-[#0f1216]">
+    <div className="w-full max-w-full overflow-hidden bg-[#0f1216]">
       <div className="ticker-marquee w-full max-w-full px-3 py-2 md:px-4">
         <div className="ticker-track">
           {scrollingItems.map((item, index) => {
@@ -81,7 +81,7 @@ export default function MarketTickerBar() {
             return (
               <div
                 key={`${item.symbol}-${index}`}
-                className="flex shrink-0 items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs"
+                className="flex shrink-0 items-center gap-2 rounded-full border border-amber-300 bg-white/5 px-3 py-1 text-xs"
               >
                 <span className="grid h-5 w-5 place-items-center rounded-full bg-white/10 text-[10px] font-semibold text-emerald-200">
                   {symbolBadge(item.symbol)}
