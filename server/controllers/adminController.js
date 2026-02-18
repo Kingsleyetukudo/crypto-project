@@ -64,17 +64,57 @@ const processTransactionStatusChange = async (transactionId, status) => {
     if (!user) {
       return { code: 404, payload: { message: "User not found" } };
     }
-    if (transaction.type === "withdrawal" && user.balance < transaction.amount) {
-      return { code: 400, payload: { message: "Insufficient user balance" } };
+    if (transaction.type === "withdrawal") {
+      const isReferralWithdrawal = transaction.source === "referral";
+      const available = isReferralWithdrawal
+        ? Number(user.referralEarnings || 0)
+        : Number(user.balance || 0);
+      if (available < transaction.amount) {
+        return {
+          code: 400,
+          payload: {
+            message: isReferralWithdrawal
+              ? "Insufficient referral balance"
+              : "Insufficient user balance",
+          },
+        };
+      }
     }
 
-    const delta = transaction.type === "withdrawal"
-      ? -transaction.amount
-      : transaction.amount;
+    if (transaction.type === "withdrawal") {
+      if (transaction.source === "referral") {
+        await User.findByIdAndUpdate(transaction.userId, {
+          $inc: { referralEarnings: -transaction.amount },
+        });
+      } else {
+        await User.findByIdAndUpdate(transaction.userId, {
+          $inc: { balance: -transaction.amount },
+        });
+      }
+    } else {
+      await User.findByIdAndUpdate(transaction.userId, {
+        $inc: { balance: transaction.amount },
+      });
+    }
 
-    await User.findByIdAndUpdate(transaction.userId, {
-      $inc: { balance: delta },
-    });
+    if (transaction.type === "deposit" && user.referredBy) {
+      const bonus = Number((Number(transaction.amount || 0) * 0.01).toFixed(2));
+      if (bonus > 0) {
+        await User.findByIdAndUpdate(user.referredBy, {
+          $inc: { referralEarnings: bonus },
+        });
+
+        await Transaction.create({
+          userId: user.referredBy,
+          amount: bonus,
+          type: "profit",
+          status: "completed",
+          txHash: `REFERRAL-${transaction._id}`,
+          walletName: "Referral Bonus",
+          asset: transaction.asset || "USD",
+        });
+      }
+    }
   }
 
   transaction.status = status;

@@ -1,14 +1,18 @@
 import React from "react";
 import { Eye, EyeOff, Globe, Lock, Mail, User } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import api from "../../api/axios.js";
 import countries from "i18n-iso-countries";
 import enCountries from "i18n-iso-countries/langs/en.json";
 import currencyCodes from "currency-codes";
 import Logo from "../../assets/Goldchain-logo.png";
 
+const REF_STORAGE_KEY = "pending_referral_code";
+
 export default function Register() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { referralCode: referralCodeFromPath } = useParams();
   const [showPassword, setShowPassword] = React.useState(false);
   const [showConfirm, setShowConfirm] = React.useState(false);
   const [form, setForm] = React.useState({
@@ -20,6 +24,7 @@ export default function Register() {
     country: "",
     currency: "",
     otp: "",
+    referralCode: "",
   });
   const [loading, setLoading] = React.useState(false);
   const [sendingOtp, setSendingOtp] = React.useState(false);
@@ -45,6 +50,17 @@ export default function Register() {
     setForm((prev) => ({ ...prev, [key]: event.target.value }));
   };
 
+  React.useEffect(() => {
+    const queryCode = new URLSearchParams(location.search).get("ref");
+    const stored = localStorage.getItem(REF_STORAGE_KEY) || "";
+    const incoming = (referralCodeFromPath || queryCode || stored || "").trim().toUpperCase();
+    if (!incoming) {
+      return;
+    }
+    localStorage.setItem(REF_STORAGE_KEY, incoming);
+    setForm((prev) => ({ ...prev, referralCode: prev.referralCode || incoming }));
+  }, [location.search, referralCodeFromPath]);
+
   const handleSubmit = async (event) => {
     event.preventDefault();
     setError("");
@@ -68,6 +84,10 @@ export default function Register() {
 
     setLoading(true);
     try {
+      const queryCode = new URLSearchParams(location.search).get("ref");
+      const directRouteCode = String(referralCodeFromPath || queryCode || "")
+        .trim()
+        .toUpperCase();
       const res = await api.post("/auth/register", {
         firstName: form.firstName,
         lastName: form.lastName,
@@ -76,10 +96,16 @@ export default function Register() {
         country: form.country,
         currency: form.currency,
         otp: form.otp,
+        referralCode:
+          form.referralCode
+          || localStorage.getItem(REF_STORAGE_KEY)
+          || directRouteCode
+          || undefined,
       });
       if (res.data?.token) {
         localStorage.setItem("token", res.data.token);
       }
+      localStorage.removeItem(REF_STORAGE_KEY);
       setMessage("Account created successfully.");
       navigate("/dashboard");
     } catch (err) {
@@ -100,7 +126,18 @@ export default function Register() {
 
     setSendingOtp(true);
     try {
-      const res = await api.post("/auth/register-otp", { email: form.email });
+      const queryCode = new URLSearchParams(location.search).get("ref");
+      const directRouteCode = String(referralCodeFromPath || queryCode || "")
+        .trim()
+        .toUpperCase();
+      const res = await api.post("/auth/register-otp", {
+        email: form.email,
+        referralCode:
+          form.referralCode
+          || localStorage.getItem(REF_STORAGE_KEY)
+          || directRouteCode
+          || undefined,
+      });
       const baseMessage = res?.data?.message || "Registration OTP sent to email.";
       const smtpError = res?.data?.smtpError ? ` (${res.data.smtpError})` : "";
       setMessage(`${baseMessage}${smtpError}`);
@@ -186,6 +223,21 @@ export default function Register() {
                     value={form.otp}
                     onChange={handleChange("otp")}
                     placeholder="Enter 6-digit OTP"
+                    className="w-full bg-transparent text-sm text-slate-100 placeholder:text-slate-600 focus:outline-none"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="text-xs uppercase tracking-[0.3em] text-slate-500">
+                  Referral Code (Optional)
+                </label>
+                <div className="mt-2 flex items-center gap-3 rounded-xl border border-slate-800 bg-slate-950/70 px-4 py-3">
+                  <User className="h-4 w-4 text-slate-400" />
+                  <input
+                    type="text"
+                    value={form.referralCode}
+                    onChange={handleChange("referralCode")}
+                    placeholder="Enter referral code"
                     className="w-full bg-transparent text-sm text-slate-100 placeholder:text-slate-600 focus:outline-none"
                   />
                 </div>

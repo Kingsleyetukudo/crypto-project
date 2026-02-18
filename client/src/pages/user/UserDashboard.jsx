@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import { ArrowUpRight, CalendarDays, ChevronDown, Coins, Ellipsis, Sparkles, Wallet } from "lucide-react";
 import TransactionTable from "../../components/TransactionTable.jsx";
 import DepositModal from "../../components/DepositModal.jsx";
@@ -6,6 +7,21 @@ import Pagination from "../../components/Pagination.jsx";
 import MarketTickerBar from "../../components/MarketTickerBar.jsx";
 import api from "../../api/axios.js";
 import profileAvatar from "../../assets/profile-avatar.png";
+
+const getTokenUserId = () => {
+  try {
+    const token = localStorage.getItem("token");
+    if (!token) return "";
+    const payload = token.split(".")[1];
+    if (!payload) return "";
+    const normalized = payload.replace(/-/g, "+").replace(/_/g, "/");
+    const padded = normalized + "=".repeat((4 - (normalized.length % 4)) % 4);
+    const decoded = JSON.parse(atob(padded));
+    return String(decoded?.id || "").trim();
+  } catch {
+    return "";
+  }
+};
 
 const yearlyMarketData = [
   { month: "Jan", open: 18000, close: 22000, high: 26000, low: 12000, volume: 40, upper: 40000, lower: 15000 },
@@ -94,9 +110,11 @@ export default function UserDashboard() {
   const [newsItems, setNewsItems] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
   const [refCopied, setRefCopied] = React.useState(false);
+  const [referralSummary, setReferralSummary] = React.useState(null);
   const [activeRange, setActiveRange] = React.useState("yearly");
   const [activeSymbol, setActiveSymbol] = React.useState("BTC");
   const [marketCandles, setMarketCandles] = React.useState([]);
+  const tokenUserId = React.useMemo(() => getTokenUserId(), []);
 
   const fetchProfile = React.useCallback(async () => {
     const response = await api.get("/auth/profile");
@@ -119,26 +137,24 @@ export default function UserDashboard() {
 
   const refreshData = React.useCallback(async () => {
     setLoading(true);
-    try {
-      const [profileData, transactionData, newsData] = await Promise.all([
-        fetchProfile(),
-        fetchTransactions(),
-        fetchNews(),
-      ]);
-      setProfile(profileData);
-      setTransactions(
-        Array.isArray(transactionData?.items) ? transactionData.items : [],
-      );
-      setTransactionsTotal(Number(transactionData?.total) || 0);
-      setNewsItems(Array.isArray(newsData?.items) ? newsData.items : []);
-    } catch {
-      setProfile(null);
-      setTransactions([]);
-      setTransactionsTotal(0);
-      setNewsItems([]);
-    } finally {
-      setLoading(false);
-    }
+    const [profileRes, txRes, newsRes, referralRes] = await Promise.allSettled([
+      fetchProfile(),
+      fetchTransactions(),
+      fetchNews(),
+      api.get("/users/referrals").then((res) => res.data || null),
+    ]);
+
+    const profileData = profileRes.status === "fulfilled" ? profileRes.value : null;
+    const transactionData = txRes.status === "fulfilled" ? txRes.value : {};
+    const newsData = newsRes.status === "fulfilled" ? newsRes.value : {};
+    const referralData = referralRes.status === "fulfilled" ? referralRes.value : null;
+
+    setProfile(profileData);
+    setReferralSummary(referralData);
+    setTransactions(Array.isArray(transactionData?.items) ? transactionData.items : []);
+    setTransactionsTotal(Number(transactionData?.total) || 0);
+    setNewsItems(Array.isArray(newsData?.items) ? newsData.items : []);
+    setLoading(false);
   }, [fetchNews, fetchProfile, fetchTransactions]);
 
   React.useEffect(() => {
@@ -250,9 +266,11 @@ export default function UserDashboard() {
     date: tx.createdAt ? new Date(tx.createdAt).toLocaleDateString() : "—",
   }));
 
-  const refCode = profile?.email ? profile.email.split("@")[0] : "user";
+  const refCode = String(
+    referralSummary?.referralCode || profile?.referralCode || profile?.id || tokenUserId || "",
+  ).trim().toUpperCase();
   const baseUrl = import.meta.env.VITE_APP_URL || window.location.origin;
-  const referralLink = `${baseUrl}/ref/${refCode}`;
+  const referralLink = refCode ? `${baseUrl}/ref/${refCode}` : "";
 
   const handleCopyReferral = async () => {
     try {
@@ -620,10 +638,11 @@ export default function UserDashboard() {
             </p>
             <div className="mt-3 flex items-center justify-between gap-3 rounded-xl border border-white/10 bg-[#0b0c0d] px-3 py-2">
               <span className="truncate text-xs text-slate-400">
-                {referralLink}
+                {referralLink || "Referral link unavailable"}
               </span>
               <button
                 onClick={handleCopyReferral}
+                disabled={!referralLink}
                 className="rounded-full border border-white/10 px-3 py-2 text-xs text-slate-300 hover:border-amber-400 hover:text-amber-200"
               >
                 {refCopied ? "Copied" : "Copy"}
@@ -632,17 +651,32 @@ export default function UserDashboard() {
           </div>
           <div className="mt-4 grid grid-cols-2 gap-4 text-center">
             <div>
-              <p className="text-lg font-semibold text-white">0</p>
+              <p className="text-lg font-semibold text-white">
+                {Number(
+                  referralSummary?.totalReferrals
+                    ?? (Array.isArray(referralSummary?.items) ? referralSummary.items.length : undefined)
+                    ?? profile?.totalReferrals
+                    ?? 0,
+                ) || 0}
+              </p>
               <p className="text-xs text-slate-500">Total Referrals</p>
             </div>
             <div>
-              <p className="text-lg font-semibold text-white">$0.00</p>
+              <p className="text-lg font-semibold text-white">
+                ${(Number(referralSummary?.referralEarnings) || 0).toLocaleString(undefined, {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}
+              </p>
               <p className="text-xs text-slate-500">Referral Earnings</p>
             </div>
           </div>
-          <button className="mt-6 w-full rounded-full bg-amber-400 px-4 py-3 text-sm font-semibold text-slate-950 hover:bg-amber-300">
+          <Link
+            to="/referrals"
+            className="mt-6 block w-full rounded-full bg-amber-400 px-4 py-3 text-center text-sm font-semibold text-slate-950 hover:bg-amber-300"
+          >
             View All Referrals
-          </button>
+          </Link>
         </div>
 
         <div className="rounded-3xl border border-white/10 bg-gradient-to-b from-[#1b1d22] to-[#14161a] p-6">

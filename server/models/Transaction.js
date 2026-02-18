@@ -25,6 +25,11 @@ const transactionSchema = new mongoose.Schema(
     asset: { type: String },
     destinationAddress: { type: String },
     destinationNetwork: { type: String },
+    source: {
+      type: String,
+      enum: ["main", "referral"],
+      default: "main",
+    },
   },
   { timestamps: true },
 );

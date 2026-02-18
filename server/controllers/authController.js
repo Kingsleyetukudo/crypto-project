@@ -10,11 +10,109 @@ import { sendAdminEventNotification, sendOtpMail } from "../utils/mailer.js";
 
 const OTP_TTL_MS = 10 * 60 * 1000;
 const isProduction = process.env.NODE_ENV === "production";
+const buildReferrerMatch = (userId) => {
+  const asString = String(userId || "").trim();
+  return {
+    $or: [{ referredBy: userId }, { referredBy: asString }],
+  };
+};
 
 const signToken = (user) =>
   jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, {
     expiresIn: "7d",
   });
+
+const normalizeReferralCode = (value) =>
+  String(value || "")
+    .trim()
+    .toUpperCase()
+    .replace(/[^A-Z0-9_-]/g, "");
+
+const isMongoObjectId = (value) => /^[A-F0-9]{24}$/i.test(String(value || "").trim());
+
+const parseReferralFromReferer = (referer) => {
+  const raw = String(referer || "").trim();
+  if (!raw) return "";
+
+  try {
+    const url = new URL(raw);
+    const queryRef = String(url.searchParams.get("ref") || "").trim();
+    if (queryRef) return queryRef;
+
+    const segments = url.pathname.split("/").filter(Boolean);
+    const refIndex = segments.findIndex((part) => part.toLowerCase() === "ref");
+    if (refIndex >= 0 && segments[refIndex + 1]) {
+      return String(segments[refIndex + 1]).trim();
+    }
+    return "";
+  } catch {
+    return "";
+  }
+};
+
+const resolveIncomingReferral = ({ req, otpRecord }) => {
+  const bodyRef = String(
+    req.body?.referralCode || req.body?.ref || req.body?.referrer || "",
+  ).trim();
+  const otpRef = String(otpRecord?.referralCode || "").trim();
+  const headerRef = parseReferralFromReferer(req.headers?.referer);
+  return bodyRef || otpRef || headerRef || "";
+};
+
+const resolveReferrerByValue = async (value) => {
+  const raw = String(value || "").trim();
+  if (!raw) return null;
+
+  if (isMongoObjectId(raw)) {
+    const byId = await User.findById(raw).select("_id");
+    if (byId) return byId;
+  }
+
+  const normalized = normalizeReferralCode(raw);
+  if (!normalized) return null;
+
+  return User.findOne({
+    referralCode: { $in: Array.from(new Set([raw, normalized])) },
+  }).select("_id");
+};
+
+const buildReferralCodeBase = ({ firstName, lastName, email }) => {
+  const full = `${firstName || ""}${lastName || ""}`.trim();
+  const source = full || String(email || "").split("@")[0] || "USER";
+  const cleaned = source.toUpperCase().replace(/[^A-Z0-9]/g, "");
+  return cleaned.slice(0, 12) || "USER";
+};
+
+const generateUniqueReferralCode = async ({ firstName, lastName, email }) => {
+  const base = buildReferralCodeBase({ firstName, lastName, email });
+  let candidate = base;
+  let attempt = 0;
+
+  while (attempt < 30) {
+    const exists = await User.exists({ referralCode: candidate });
+    if (!exists) {
+      return candidate;
+    }
+    const suffix = crypto.randomBytes(2).toString("hex").toUpperCase();
+    candidate = `${base}${suffix}`.slice(0, 16);
+    attempt += 1;
+  }
+
+  return `${base}${Date.now().toString(36).toUpperCase()}`.slice(0, 16);
+};
+
+const ensureReferralCode = async (user) => {
+  if (!user || user.referralCode) {
+    return user;
+  }
+  user.referralCode = await generateUniqueReferralCode({
+    firstName: user.firstName,
+    lastName: user.lastName,
+    email: user.email,
+  });
+  await user.save();
+  return user;
+};
 
 export const sendRegistrationOtp = async (req, res) => {
   try {
@@ -32,10 +130,13 @@ export const sendRegistrationOtp = async (req, res) => {
     const otp = crypto.randomInt(100000, 999999).toString();
     const otpHash = crypto.createHash("sha256").update(otp).digest("hex");
     const expiresAt = new Date(Date.now() + OTP_TTL_MS);
+    const normalizedReferralCode = normalizeReferralCode(
+      resolveIncomingReferral({ req }),
+    );
 
     await RegistrationOtp.findOneAndUpdate(
       { email: normalizedEmail },
-      { otpHash, expiresAt },
+      { otpHash, expiresAt, referralCode: normalizedReferralCode || undefined },
       { upsert: true, returnDocument: "after", setDefaultsOnInsert: true },
     );
 
@@ -78,7 +179,15 @@ export const sendRegistrationOtp = async (req, res) => {
 
 export const register = async (req, res) => {
   try {
-    const { firstName, lastName, email, password, country, currency, otp } = req.body;
+    const {
+      firstName,
+      lastName,
+      email,
+      password,
+      country,
+      currency,
+      otp,
+    } = req.body;
     const name = [firstName, lastName].filter(Boolean).join(" ").trim();
 
     if (!name || !email || !password || !otp) {
@@ -106,6 +215,20 @@ export const register = async (req, res) => {
 
     const salt = await bcrypt.genSalt(10);
     const hashed = await bcrypt.hash(password, salt);
+    const incomingReferralValue = resolveIncomingReferral({ req, otpRecord });
+    let referredBy = null;
+    if (incomingReferralValue) {
+      const referrer = await resolveReferrerByValue(incomingReferralValue);
+      if (!referrer) {
+        return res.status(400).json({ message: "Invalid referral code" });
+      }
+      referredBy = referrer._id;
+    }
+    const userReferralCode = await generateUniqueReferralCode({
+      firstName,
+      lastName,
+      email: normalizedEmail,
+    });
 
     const user = await User.create({
       name,
@@ -115,6 +238,8 @@ export const register = async (req, res) => {
       password: hashed,
       country,
       currency,
+      referralCode: userReferralCode,
+      referredBy,
     });
     const token = signToken(user);
     await RegistrationOtp.deleteOne({ email: normalizedEmail });
@@ -141,6 +266,10 @@ export const register = async (req, res) => {
         balance: user.balance,
         country: user.country,
         currency: user.currency,
+        referralCode: user.referralCode,
+        referralEarnings: user.referralEarnings,
+        referredBy: user.referredBy,
+        referralBalance: user.referralBalance,
       },
     });
   } catch (error) {
@@ -165,6 +294,7 @@ export const login = async (req, res) => {
     if (!matches) {
       return res.status(401).json({ message: "Invalid credentials" });
     }
+    await ensureReferralCode(user);
 
     const token = signToken(user);
     return res.json({
@@ -175,6 +305,9 @@ export const login = async (req, res) => {
         email: user.email,
         role: user.role,
         balance: user.balance,
+        referralCode: user.referralCode,
+        referralEarnings: user.referralEarnings,
+        referralBalance: user.referralBalance,
       },
     });
   } catch (error) {
@@ -273,6 +406,7 @@ export const getProfile = async (req, res) => {
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
+    await ensureReferralCode(user);
 
     const activeInvestments = await Investment.countDocuments({
       userId: req.user._id,
@@ -309,6 +443,7 @@ export const getProfile = async (req, res) => {
       0,
     );
     const totalAssets = Number(user.balance || 0) + totalActiveInvestment;
+    const totalReferrals = await User.countDocuments(buildReferrerMatch(req.user._id));
 
     return res.json({
       id: user._id,
@@ -320,12 +455,17 @@ export const getProfile = async (req, res) => {
       balance: user.balance,
       country: user.country,
       currency: user.currency,
+      referralCode: user.referralCode,
+      referralEarnings: user.referralEarnings,
+      referredBy: user.referredBy,
+      referralBalance: user.referralBalance,
       activeInvestments,
       totalProfit,
       totalDeposits,
       totalActiveInvestment,
       totalAssets,
       apy: avgApy,
+      totalReferrals,
     });
   } catch (error) {
     return res.status(500).json({ message: "Failed to fetch profile" });
@@ -369,6 +509,9 @@ export const updateProfile = async (req, res) => {
       balance: user.balance,
       country: user.country,
       currency: user.currency,
+      referralCode: user.referralCode,
+      referralEarnings: user.referralEarnings,
+      referralBalance: user.referralBalance,
     });
   } catch (error) {
     return res.status(500).json({ message: "Failed to update profile" });
