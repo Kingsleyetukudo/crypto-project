@@ -69,22 +69,26 @@ export const createDeposit = async (req, res) => {
 export const createWithdraw = async (req, res) => {
   try {
     const { amount, destinationAddress, destinationNetwork, txHash } = req.body;
+    const numericAmount = Number(amount);
 
-    if (!amount || amount <= 0) {
+    if (!Number.isFinite(numericAmount) || numericAmount <= 0) {
       return res.status(400).json({ message: "Valid amount required" });
+    }
+    if (numericAmount < 100) {
+      return res.status(400).json({ message: "Minimum withdrawal amount is $100" });
     }
     if (!destinationAddress) {
       return res.status(400).json({ message: "Destination address required" });
     }
 
     const user = await User.findById(req.user._id);
-    if (!user || user.balance < amount) {
+    if (!user || user.balance < numericAmount) {
       return res.status(400).json({ message: "Insufficient balance" });
     }
 
     const transaction = await Transaction.create({
       userId: req.user._id,
-      amount,
+      amount: numericAmount,
       type: "withdrawal",
       status: "pending",
       txHash,
@@ -98,7 +102,7 @@ export const createWithdraw = async (req, res) => {
       intro: "A user submitted a new withdrawal request.",
       rows: [
         { label: "User", value: req.user.email },
-        { label: "Amount", value: `${amount}` },
+        { label: "Amount", value: `${numericAmount}` },
         { label: "Destination", value: destinationAddress },
         { label: "Network", value: destinationNetwork || "-" },
         { label: "Status", value: "pending" },
@@ -111,7 +115,7 @@ export const createWithdraw = async (req, res) => {
       title: "Withdrawal Request Received",
       intro: "Your withdrawal request was received and is pending admin review.",
       rows: [
-        { label: "Amount", value: `${amount}` },
+        { label: "Amount", value: `${numericAmount}` },
         { label: "Destination", value: destinationAddress },
         { label: "Network", value: destinationNetwork || "-" },
         { label: "Status", value: "pending" },

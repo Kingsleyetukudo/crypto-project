@@ -79,11 +79,11 @@ export default function AdminDashboard() {
     loadWallets();
   }, [loadWallets]);
 
-  const handleAction = async (id, status) => {
+  const handleAction = async (id, status, note = "") => {
     setActionId(id);
     setError("");
     try {
-      await api.patch(`/admin/approve/${id}`, { status });
+      await api.patch(`/admin/approve/${id}`, { status, note });
       setPendingPage(1);
       await loadPending();
     } catch (err) {
@@ -257,7 +257,15 @@ export default function AdminDashboard() {
                             Approve
                           </button>
                           <button
-                            onClick={() => handleAction(item.id, "rejected")}
+                            onClick={() => {
+                              if (item.type !== "withdrawal") {
+                                handleAction(item.id, "rejected");
+                                return;
+                              }
+                              const reason = window.prompt("Enter rejection reason:");
+                              if (!reason || !reason.trim()) return;
+                              handleAction(item.id, "rejected", reason);
+                            }}
                             disabled={actionId === item.id}
                             className="inline-flex items-center gap-2 rounded-full border border-rose-500/70 px-4 py-2 text-xs font-semibold text-rose-200 hover:border-rose-400 hover:text-rose-100 disabled:cursor-not-allowed disabled:opacity-70"
                           >

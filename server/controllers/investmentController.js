@@ -1,10 +1,54 @@
 import Investment from "../models/Investment.js";
 import InvestmentPlan from "../models/InvestmentPlan.js";
+import Transaction from "../models/Transaction.js";
 import User from "../models/User.js";
 import {
   sendAdminEventNotification,
   sendUserEventNotification,
 } from "../utils/mailer.js";
+
+const ROI_WITHDRAWAL_MIN = 100;
+const ROI_WITHDRAWAL_INTERVAL_DAYS = 10;
+const ROI_WITHDRAWALS_PER_MONTH = 3;
+
+const buildReferrerMatch = (userId) => {
+  const asString = String(userId || "").trim();
+  return {
+    $or: [{ referredBy: userId }, { referredBy: asString }],
+  };
+};
+
+const getDailyInterestAmount = (investment) => {
+  const amount = Number(investment?.amount || 0);
+  const roi = Number(investment?.roi || 0);
+  const duration = Number(investment?.durationDays || 0);
+  if (!amount || !roi || !duration) return 0;
+  return (amount * (roi / 100)) / duration;
+};
+
+const mapInvestmentForClient = (investment) => {
+  const accrued = Number(investment.totalInterestAccrued || 0);
+  const withdrawn = Number(investment.totalInterestWithdrawn || 0);
+  const available = Math.max(0, accrued - withdrawn);
+  const dailyInterest = getDailyInterestAmount(investment);
+  const nextEligibleAt = investment.lastInterestWithdrawalAt
+    ? new Date(
+      new Date(investment.lastInterestWithdrawalAt).getTime()
+        + ROI_WITHDRAWAL_INTERVAL_DAYS * 24 * 60 * 60 * 1000,
+    )
+    : null;
+  return {
+    ...investment.toObject(),
+    dailyInterest,
+    availableInterest: available,
+    nextRoiWithdrawalAt: nextEligibleAt,
+    roiWithdrawalRules: {
+      minAmount: ROI_WITHDRAWAL_MIN,
+      intervalDays: ROI_WITHDRAWAL_INTERVAL_DAYS,
+      perMonth: ROI_WITHDRAWALS_PER_MONTH,
+    },
+  };
+};
 
 export const getPlans = async (req, res) => {
   try {
@@ -112,7 +156,12 @@ export const getMyInvestments = async (req, res) => {
       .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
       .limit(limit);
-    return res.json({ items: investments, total, page, limit });
+    return res.json({
+      items: investments.map((item) => mapInvestmentForClient(item)),
+      total,
+      page,
+      limit,
+    });
   } catch (error) {
     return res.status(500).json({ message: "Failed to fetch investments" });
   }
@@ -128,8 +177,136 @@ export const getActiveInvestments = async (req, res) => {
       .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
       .limit(limit);
-    return res.json({ items: investments, total, page, limit });
+    return res.json({
+      items: investments.map((item) => mapInvestmentForClient(item)),
+      total,
+      page,
+      limit,
+    });
   } catch (error) {
     return res.status(500).json({ message: "Failed to fetch active investments" });
+  }
+};
+
+export const createRoiWithdrawal = async (req, res) => {
+  try {
+    const investmentId = String(req.body?.investmentId || "").trim();
+    const amount = Number(req.body?.amount);
+
+    if (!investmentId) {
+      return res.status(400).json({ message: "Investment is required" });
+    }
+    if (!Number.isFinite(amount) || amount < ROI_WITHDRAWAL_MIN) {
+      return res.status(400).json({
+        message: `Minimum ROI withdrawal amount is $${ROI_WITHDRAWAL_MIN}`,
+      });
+    }
+
+    const investment = await Investment.findOne({
+      _id: investmentId,
+      userId: req.user._id,
+    });
+    if (!investment) {
+      return res.status(404).json({ message: "Investment not found" });
+    }
+
+    const pendingTotalAgg = await Transaction.aggregate([
+      {
+        $match: {
+          userId: req.user._id,
+          type: "withdrawal",
+          source: "investment_roi",
+          investmentId: investment._id,
+          status: "pending",
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          total: { $sum: "$amount" },
+        },
+      },
+    ]);
+    const pendingTotal = Number(pendingTotalAgg?.[0]?.total || 0);
+    const available = Math.max(
+      0,
+      Number(investment.totalInterestAccrued || 0)
+        - Number(investment.totalInterestWithdrawn || 0)
+        - pendingTotal,
+    );
+
+    if (available < amount) {
+      return res.status(400).json({ message: "Insufficient accrued ROI for this request" });
+    }
+
+    const now = new Date();
+    const isCompleted = now >= new Date(investment.endDate) || investment.status === "completed";
+
+    if (!isCompleted) {
+      if (investment.lastInterestWithdrawalAt) {
+        const nextAllowed = new Date(investment.lastInterestWithdrawalAt);
+        nextAllowed.setDate(nextAllowed.getDate() + ROI_WITHDRAWAL_INTERVAL_DAYS);
+        if (now < nextAllowed) {
+          return res.status(400).json({
+            message: `ROI withdrawal is allowed every ${ROI_WITHDRAWAL_INTERVAL_DAYS} days. Next available date: ${nextAllowed.toISOString()}`,
+          });
+        }
+      }
+
+      const monthStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
+      const monthEnd = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1));
+      const monthlyCount = await Transaction.countDocuments({
+        userId: req.user._id,
+        type: "withdrawal",
+        source: "investment_roi",
+        investmentId: investment._id,
+        status: { $in: ["pending", "completed"] },
+        createdAt: { $gte: monthStart, $lt: monthEnd },
+      });
+      if (monthlyCount >= ROI_WITHDRAWALS_PER_MONTH) {
+        return res.status(400).json({
+          message: `ROI can be withdrawn only ${ROI_WITHDRAWALS_PER_MONTH} times per month`,
+        });
+      }
+
+      const totalReferrals = await User.countDocuments(buildReferrerMatch(req.user._id));
+      if (totalReferrals <= Number(investment.referralCountAtLastWithdrawal || 0)) {
+        return res.status(400).json({
+          message: "A new referral is required before the next 10-day ROI withdrawal",
+        });
+      }
+
+      const transaction = await Transaction.create({
+        userId: req.user._id,
+        amount,
+        type: "withdrawal",
+        status: "pending",
+        source: "investment_roi",
+        investmentId: investment._id,
+        referralCountAtRequest: totalReferrals,
+      });
+
+      return res.status(201).json({
+        message: "ROI withdrawal request submitted",
+        transaction,
+      });
+    }
+
+    const transaction = await Transaction.create({
+      userId: req.user._id,
+      amount,
+      type: "withdrawal",
+      status: "pending",
+      source: "investment_roi",
+      investmentId: investment._id,
+      referralCountAtRequest: Number(investment.referralCountAtLastWithdrawal || 0),
+    });
+
+    return res.status(201).json({
+      message: "ROI withdrawal request submitted",
+      transaction,
+    });
+  } catch (error) {
+    return res.status(500).json({ message: "Failed to submit ROI withdrawal" });
   }
 };

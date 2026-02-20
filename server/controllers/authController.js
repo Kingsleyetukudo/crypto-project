@@ -415,7 +415,7 @@ export const getProfile = async (req, res) => {
     const activeInvestmentRows = await Investment.find({
       userId: req.user._id,
       status: "active",
-    }).select("amount roi");
+    }).select("amount roi durationDays totalInterestAccrued totalInterestWithdrawn lastInterestAccrualAt createdAt");
     const totalActiveInvestment = activeInvestmentRows.reduce(
       (sum, row) => sum + (Number(row.amount) || 0),
       0,
@@ -424,6 +424,26 @@ export const getProfile = async (req, res) => {
       ? activeInvestmentRows.reduce((sum, row) => sum + (Number(row.roi) || 0), 0)
         / activeInvestmentRows.length
       : 0;
+    const totalDailyInterest = activeInvestmentRows.reduce((sum, row) => {
+      const amount = Number(row.amount || 0);
+      const roi = Number(row.roi || 0);
+      const duration = Number(row.durationDays || 0);
+      if (!amount || !roi || !duration) return sum;
+      return sum + (amount * (roi / 100)) / duration;
+    }, 0);
+    const totalAccruedInterest = activeInvestmentRows.reduce(
+      (sum, row) => sum + (Number(row.totalInterestAccrued || 0) - Number(row.totalInterestWithdrawn || 0)),
+      0,
+    );
+    const nextInterestDropCandidates = activeInvestmentRows
+      .map((row) => {
+        const base = row.lastInterestAccrualAt || row.createdAt;
+        if (!base) return null;
+        return new Date(new Date(base).getTime() + 24 * 60 * 60 * 1000);
+      })
+      .filter(Boolean)
+      .sort((a, b) => a.getTime() - b.getTime());
+    const nextInterestDropAt = nextInterestDropCandidates[0] || null;
     const profitTx = await Transaction.find({
       userId: req.user._id,
       type: "profit",
@@ -466,6 +486,9 @@ export const getProfile = async (req, res) => {
       totalAssets,
       apy: avgApy,
       totalReferrals,
+      totalDailyInterest,
+      totalAccruedInterest,
+      nextInterestDropAt,
     });
   } catch (error) {
     return res.status(500).json({ message: "Failed to fetch profile" });

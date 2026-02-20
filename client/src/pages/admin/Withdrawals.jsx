@@ -11,6 +11,8 @@ export default function Withdrawals() {
   const [page, setPage] = React.useState(1);
   const [limit, setLimit] = React.useState(10);
   const [total, setTotal] = React.useState(0);
+  const [rejectingId, setRejectingId] = React.useState(null);
+  const [rejectNote, setRejectNote] = React.useState("");
 
   const loadPending = React.useCallback(async () => {
     setLoading(true);
@@ -35,17 +37,19 @@ export default function Withdrawals() {
     loadPending();
   }, [loadPending]);
 
-  const handleAction = async (id, status) => {
+  const handleAction = async (id, status, note = "") => {
     setActionId(id);
     setError("");
     try {
-      await api.patch(`/admin/approve/${id}`, { status });
+      await api.patch(`/admin/approve/${id}`, { status, note });
       setPage(1);
       await loadPending();
     } catch (err) {
       setError(err?.response?.data?.message || "Action failed. Try again.");
     } finally {
       setActionId(null);
+      setRejectingId(null);
+      setRejectNote("");
     }
   };
 
@@ -126,7 +130,10 @@ export default function Withdrawals() {
                           Approve
                         </button>
                         <button
-                          onClick={() => handleAction(tx._id, "rejected")}
+                          onClick={() => {
+                            setRejectingId(tx._id);
+                            setRejectNote("");
+                          }}
                           disabled={actionId === tx._id}
                           className="inline-flex items-center gap-2 rounded-full border border-rose-500/70 px-4 py-2 text-xs font-semibold text-rose-200 hover:border-rose-400 hover:text-rose-100 disabled:cursor-not-allowed disabled:opacity-70"
                         >
@@ -138,6 +145,36 @@ export default function Withdrawals() {
                           Reject
                         </button>
                       </div>
+                      {rejectingId === tx._id ? (
+                        <div className="mt-3 space-y-2 rounded-lg border border-white/10 bg-slate-950/60 p-3">
+                          <input
+                            value={rejectNote}
+                            onChange={(event) => setRejectNote(event.target.value)}
+                            placeholder="Reason for rejection"
+                            className="w-full rounded-lg border border-white/10 bg-slate-900 px-3 py-2 text-xs text-white focus:outline-none"
+                          />
+                          <div className="flex gap-2">
+                            <button
+                              type="button"
+                              onClick={() => handleAction(tx._id, "rejected", rejectNote)}
+                              disabled={actionId === tx._id || !rejectNote.trim()}
+                              className="rounded-lg bg-rose-500 px-3 py-1.5 text-xs font-semibold text-white hover:bg-rose-400 disabled:opacity-70"
+                            >
+                              Submit Rejection
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setRejectingId(null);
+                                setRejectNote("");
+                              }}
+                              className="rounded-lg border border-white/10 px-3 py-1.5 text-xs text-slate-300"
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        </div>
+                      ) : null}
                     </td>
                   </tr>
                 ))

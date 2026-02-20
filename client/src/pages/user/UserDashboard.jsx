@@ -257,6 +257,9 @@ export default function UserDashboard() {
   const totalDeposits = Number(profile?.totalDeposits ?? 0);
   const totalBalance = Number(profile?.balance ?? 0);
   const apy = Number(profile?.apy ?? 0);
+  const dailyInterest = Number(profile?.totalDailyInterest ?? 0);
+  const accruedInterest = Number(profile?.totalAccruedInterest ?? 0);
+  const nextInterestDropAt = profile?.nextInterestDropAt ? new Date(profile.nextInterestDropAt) : null;
 
   const tableRows = transactions.map((tx) => ({
     id: tx._id || tx.id,
@@ -264,6 +267,7 @@ export default function UserDashboard() {
     amount: tx.amount,
     status: tx.status,
     date: tx.createdAt ? new Date(tx.createdAt).toLocaleDateString() : "—",
+    note: tx.rejectionNote || "",
   }));
 
   const refCode = String(
@@ -360,6 +364,26 @@ export default function UserDashboard() {
         </div>
 
         <MarketTickerBar />
+
+        <div className="rounded-2xl border border-amber-400/30 bg-amber-500/10 p-4">
+          <p className="text-xs uppercase tracking-[0.28em] text-amber-200/80">
+            Interest Notification
+          </p>
+          <p className="mt-2 text-sm text-amber-100">
+            Daily investment interest updates every 24 hours based on your plan ROI.
+          </p>
+          <div className="mt-3 grid gap-2 text-xs text-amber-100/90 md:grid-cols-3">
+            <p>
+              Daily Interest: <span className="font-semibold">${dailyInterest.toFixed(2)}</span>
+            </p>
+            <p>
+              Accrued Interest: <span className="font-semibold">${accruedInterest.toFixed(2)}</span>
+            </p>
+            <p>
+              Next Drop: <span className="font-semibold">{nextInterestDropAt ? nextInterestDropAt.toLocaleString() : "No active interest cycle"}</span>
+            </p>
+          </div>
+        </div>
 
         <div className="grid gap-4 md:grid-cols-3">
           <div className="rounded-2xl border border-white/10 bg-amber-400/90 p-5 text-slate-950">

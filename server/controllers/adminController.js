@@ -45,7 +45,9 @@ export const getPendingByType = async (req, res) => {
   }
 };
 
-const processTransactionStatusChange = async (transactionId, status) => {
+const processTransactionStatusChange = async (transactionId, status, note = "") => {
+  const normalizedNote = String(note || "").trim();
+
   if (!["completed", "rejected"].includes(status)) {
     return { code: 400, payload: { message: "Invalid status" } };
   }
@@ -58,6 +60,9 @@ const processTransactionStatusChange = async (transactionId, status) => {
   if (transaction.status !== "pending") {
     return { code: 400, payload: { message: "Transaction already processed" } };
   }
+  if (status === "rejected" && transaction.type === "withdrawal" && !normalizedNote) {
+    return { code: 400, payload: { message: "Rejection note is required for withdrawals" } };
+  }
 
   if (status === "completed") {
     const user = await User.findById(transaction.userId);
@@ -66,8 +71,29 @@ const processTransactionStatusChange = async (transactionId, status) => {
     }
     if (transaction.type === "withdrawal") {
       const isReferralWithdrawal = transaction.source === "referral";
+      const isRoiWithdrawal = transaction.source === "investment_roi";
+
+      if (isRoiWithdrawal) {
+        const investment = await Investment.findOne({
+          _id: transaction.investmentId,
+          userId: transaction.userId,
+        });
+        if (!investment) {
+          return { code: 404, payload: { message: "Investment not found for ROI withdrawal" } };
+        }
+        const available = Math.max(
+          0,
+          Number(investment.totalInterestAccrued || 0) - Number(investment.totalInterestWithdrawn || 0),
+        );
+        if (available < transaction.amount) {
+          return { code: 400, payload: { message: "Insufficient accrued investment ROI" } };
+        }
+      }
+
       const available = isReferralWithdrawal
         ? Number(user.referralEarnings || 0)
+        : isRoiWithdrawal
+          ? Number.MAX_SAFE_INTEGER
         : Number(user.balance || 0);
       if (available < transaction.amount) {
         return {
@@ -86,6 +112,18 @@ const processTransactionStatusChange = async (transactionId, status) => {
         await User.findByIdAndUpdate(transaction.userId, {
           $inc: { referralEarnings: -transaction.amount },
         });
+      } else if (transaction.source === "investment_roi") {
+        const update = {
+          $inc: { totalInterestWithdrawn: transaction.amount },
+          $set: { lastInterestWithdrawalAt: new Date() },
+        };
+        if (Number.isFinite(Number(transaction.referralCountAtRequest || 0))) {
+          update.$set.referralCountAtLastWithdrawal = Number(transaction.referralCountAtRequest || 0);
+        }
+        await Investment.findOneAndUpdate(
+          { _id: transaction.investmentId, userId: transaction.userId },
+          update,
+        );
       } else {
         await User.findByIdAndUpdate(transaction.userId, {
           $inc: { balance: -transaction.amount },
@@ -118,13 +156,14 @@ const processTransactionStatusChange = async (transactionId, status) => {
   }
 
   transaction.status = status;
+  transaction.rejectionNote = status === "rejected" ? normalizedNote : "";
   await transaction.save();
   return { code: 200, payload: transaction };
 };
 
 export const approveTransaction = async (req, res) => {
   try {
-    const result = await processTransactionStatusChange(req.params.id, req.body.status);
+    const result = await processTransactionStatusChange(req.params.id, req.body.status, req.body?.note);
     if (result.code === 200 && result.payload?.userId) {
       const user = await User.findById(result.payload.userId).select("email");
       const tx = result.payload;
@@ -143,16 +182,20 @@ export const approveTransaction = async (req, res) => {
       });
 
       if (user?.email) {
+        const rows = [
+          { label: "Amount", value: `${tx.amount}` },
+          { label: "Status", value: tx.status },
+          { label: "Reference", value: tx.txHash || tx._id },
+        ];
+        if (tx.rejectionNote) {
+          rows.push({ label: "Reason", value: tx.rejectionNote });
+        }
         void sendUserEventNotification({
           to: user.email,
           subject: `Your ${tx.type} was ${decision}`,
           title: `${tx.type === "deposit" ? "Deposit" : "Withdrawal"} ${decision}`,
           intro: `Your ${tx.type} request has been ${decision}.`,
-          rows: [
-            { label: "Amount", value: `${tx.amount}` },
-            { label: "Status", value: tx.status },
-            { label: "Reference", value: tx.txHash || tx._id },
-          ],
+          rows,
         });
       }
     }
@@ -164,7 +207,7 @@ export const approveTransaction = async (req, res) => {
 
 export const updateTransaction = async (req, res) => {
   try {
-    const result = await processTransactionStatusChange(req.params.id, req.body.status);
+    const result = await processTransactionStatusChange(req.params.id, req.body.status, req.body?.note);
     if (result.code === 200 && result.payload?.userId) {
       const user = await User.findById(result.payload.userId).select("email");
       const tx = result.payload;
@@ -183,16 +226,20 @@ export const updateTransaction = async (req, res) => {
       });
 
       if (user?.email) {
+        const rows = [
+          { label: "Amount", value: `${tx.amount}` },
+          { label: "Status", value: tx.status },
+          { label: "Reference", value: tx.txHash || tx._id },
+        ];
+        if (tx.rejectionNote) {
+          rows.push({ label: "Reason", value: tx.rejectionNote });
+        }
         void sendUserEventNotification({
           to: user.email,
           subject: `Your ${tx.type} was ${decision}`,
           title: `${tx.type === "deposit" ? "Deposit" : "Withdrawal"} ${decision}`,
           intro: `Your ${tx.type} request has been ${decision}.`,
-          rows: [
-            { label: "Amount", value: `${tx.amount}` },
-            { label: "Status", value: tx.status },
-            { label: "Reference", value: tx.txHash || tx._id },
-          ],
+          rows,
         });
       }
     }

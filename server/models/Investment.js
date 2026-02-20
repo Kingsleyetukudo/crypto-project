@@ -16,6 +16,11 @@ const investmentSchema = new mongoose.Schema(
     roi: { type: Number, required: true },
     durationDays: { type: Number, required: true },
     endDate: { type: Date, required: true },
+    totalInterestAccrued: { type: Number, default: 0 },
+    totalInterestWithdrawn: { type: Number, default: 0 },
+    lastInterestAccrualAt: { type: Date },
+    lastInterestWithdrawalAt: { type: Date },
+    referralCountAtLastWithdrawal: { type: Number, default: 0 },
     status: {
       type: String,
       enum: ["active", "completed"],

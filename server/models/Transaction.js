@@ -25,9 +25,15 @@ const transactionSchema = new mongoose.Schema(
     asset: { type: String },
     destinationAddress: { type: String },
     destinationNetwork: { type: String },
+    rejectionNote: { type: String },
+    investmentId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Investment",
+    },
+    referralCountAtRequest: { type: Number, default: 0 },
     source: {
       type: String,
-      enum: ["main", "referral"],
+      enum: ["main", "referral", "investment_roi"],
       default: "main",
     },
   },

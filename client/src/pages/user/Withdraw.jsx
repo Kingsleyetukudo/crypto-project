@@ -39,6 +39,10 @@ export default function Withdraw() {
       setError("Enter a valid amount.");
       return;
     }
+    if (Number(amount) < 100) {
+      setError("Minimum withdrawal amount is $100.");
+      return;
+    }
     if (!destinationAddress.trim()) {
       setError("Destination address is required.");
       return;
@@ -71,7 +75,7 @@ export default function Withdraw() {
       <div>
         <h2 className="text-2xl font-semibold text-white">Withdraw</h2>
         <p className="text-sm text-slate-400">
-          Request a withdrawal to your wallet address.
+          Request a withdrawal to your wallet address. Minimum withdrawal is $100.
         </p>
       </div>
 
@@ -87,6 +91,7 @@ export default function Withdraw() {
             value={amount}
             onChange={(event) => setAmount(event.target.value)}
             type="number"
+            min="100"
             placeholder="Enter amount"
             className="mt-2 w-full rounded-xl border border-white/10 bg-[#0b0c0d] px-4 py-3 text-sm text-white focus:outline-none"
           />
@@ -135,12 +140,13 @@ export default function Withdraw() {
                 <th className="px-4 py-3">Network</th>
                 <th className="px-4 py-3">Status</th>
                 <th className="px-4 py-3">Date</th>
+                <th className="px-4 py-3">Note</th>
               </tr>
             </thead>
             <tbody>
               {pageRows.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-4 py-6 text-center text-slate-400">
+                  <td colSpan={6} className="px-4 py-6 text-center text-slate-400">
                     No withdrawals yet.
                   </td>
                 </tr>
@@ -159,6 +165,9 @@ export default function Withdraw() {
                       {tx.createdAt
                         ? new Date(tx.createdAt).toLocaleDateString()
                         : "-"}
+                    </td>
+                    <td className="px-4 py-3 text-slate-400">
+                      {tx.rejectionNote || "-"}
                     </td>
                   </tr>
                 ))

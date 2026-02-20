@@ -18,13 +18,14 @@ export default function TransactionTable({ rows = [] }) {
               <th className="px-6 py-4">Amount</th>
               <th className="px-6 py-4">Status</th>
               <th className="px-6 py-4">Date</th>
+              <th className="px-6 py-4">Note</th>
             </tr>
           </thead>
           <tbody>
             {rows.length === 0 ? (
               <tr>
                 <td
-                  colSpan={4}
+                  colSpan={5}
                   className="px-6 py-8 text-center text-sm text-slate-400"
                 >
                   No transactions yet.
@@ -60,6 +61,7 @@ export default function TransactionTable({ rows = [] }) {
                     </span>
                   </td>
                   <td className="px-6 py-4 text-slate-400">{row.date}</td>
+                  <td className="px-6 py-4 text-slate-400">{row.note || "—"}</td>
                 </tr>
               );
               })

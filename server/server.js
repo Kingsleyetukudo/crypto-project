@@ -13,6 +13,7 @@ import investmentRoutes from "./routes/investmentRoutes.js";
 import walletRoutes from "./routes/walletRoutes.js";
 import newsRoutes from "./routes/newsRoutes.js";
 import marketRoutes from "./routes/marketRoutes.js";
+import { initScheduledJobs } from "./utils/cronJobs.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -41,6 +42,7 @@ const PORT = process.env.PORT || 5000;
 const startServer = async () => {
   await connectDB();
   await seedDefaultUsers();
+  initScheduledJobs();
 
   app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
