@@ -37,8 +37,8 @@ export default function MyInvestments() {
     setActionMessage("");
 
     const available = Number(investment?.availableInterest || 0);
-    if (available < 100) {
-      setActionError("Available ROI must be at least $100 to request withdrawal.");
+    if (available < 10) {
+      setActionError("Available ROI must be at least $10 to request withdrawal.");
       return;
     }
 
@@ -112,7 +112,7 @@ export default function MyInvestments() {
                   <button
                     type="button"
                     onClick={() => handleRoiWithdraw(inv)}
-                    disabled={actionLoadingId === inv._id || Number(inv.availableInterest || 0) < 100}
+                    disabled={actionLoadingId === inv._id || Number(inv.availableInterest || 0) < 10}
                     className="mt-2 rounded-lg bg-amber-400 px-3 py-1.5 text-xs font-semibold text-slate-950 hover:bg-amber-300 disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     {actionLoadingId === inv._id ? "Submitting..." : "Withdraw ROI"}

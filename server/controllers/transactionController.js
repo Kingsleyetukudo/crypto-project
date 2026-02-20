@@ -74,8 +74,8 @@ export const createWithdraw = async (req, res) => {
     if (!Number.isFinite(numericAmount) || numericAmount <= 0) {
       return res.status(400).json({ message: "Valid amount required" });
     }
-    if (numericAmount < 100) {
-      return res.status(400).json({ message: "Minimum withdrawal amount is $100" });
+    if (numericAmount < 10) {
+      return res.status(400).json({ message: "Minimum withdrawal amount is $10" });
     }
     if (!destinationAddress) {
       return res.status(400).json({ message: "Destination address required" });

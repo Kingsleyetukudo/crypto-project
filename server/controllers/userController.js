@@ -2,7 +2,8 @@ import User from "../models/User.js";
 import Transaction from "../models/Transaction.js";
 import crypto from "crypto";
 
-const REFERRAL_ACTION_MIN = 100;
+const REFERRAL_TRANSFER_MIN = 100;
+const REFERRAL_WITHDRAWAL_MIN = 10;
 
 const buildReferrerMatch = (userId) => {
   const asString = String(userId || "").trim();
@@ -105,9 +106,9 @@ export const getMyReferrals = async (req, res) => {
 export const transferReferralToMainBalance = async (req, res) => {
   try {
     const amount = Number(req.body?.amount);
-    if (!Number.isFinite(amount) || amount < REFERRAL_ACTION_MIN) {
+    if (!Number.isFinite(amount) || amount < REFERRAL_TRANSFER_MIN) {
       return res.status(400).json({
-        message: `Minimum transfer amount is $${REFERRAL_ACTION_MIN}`,
+        message: `Minimum transfer amount is $${REFERRAL_TRANSFER_MIN}`,
       });
     }
 
@@ -146,9 +147,9 @@ export const createReferralWithdrawal = async (req, res) => {
     const destinationAddress = String(req.body?.destinationAddress || "").trim();
     const destinationNetwork = String(req.body?.destinationNetwork || "").trim();
 
-    if (!Number.isFinite(amount) || amount < REFERRAL_ACTION_MIN) {
+    if (!Number.isFinite(amount) || amount < REFERRAL_WITHDRAWAL_MIN) {
       return res.status(400).json({
-        message: `Minimum withdrawal amount is $${REFERRAL_ACTION_MIN}`,
+        message: `Minimum withdrawal amount is $${REFERRAL_WITHDRAWAL_MIN}`,
       });
     }
     if (!destinationAddress) {

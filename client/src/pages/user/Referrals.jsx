@@ -62,7 +62,10 @@ export default function Referrals() {
   ) || 0;
   const referralEarnings = Number(data?.referrals?.referralEarnings) || 0;
   const availableReferralAmount = referralEarnings;
-  const canAction = availableReferralAmount >= 100;
+  const canAction =
+    actionType === "transfer"
+      ? availableReferralAmount >= 100
+      : availableReferralAmount >= 10;
 
   const handleCopy = async () => {
     try {
@@ -80,8 +83,16 @@ export default function Referrals() {
     setActionMessage("");
 
     const numericAmount = Number(amount);
-    if (!Number.isFinite(numericAmount) || numericAmount < 100) {
-      setActionError("Minimum amount is $100.");
+    if (!Number.isFinite(numericAmount)) {
+      setActionError("Enter a valid amount.");
+      return;
+    }
+    if (actionType === "transfer" && numericAmount < 100) {
+      setActionError("Minimum transfer amount is $100.");
+      return;
+    }
+    if (actionType === "withdraw" && numericAmount < 10) {
+      setActionError("Minimum withdrawal amount is $10.");
       return;
     }
     if (numericAmount > availableReferralAmount) {
@@ -169,7 +180,7 @@ export default function Referrals() {
           className="rounded-xl border border-white/10 bg-[#101214] p-4 space-y-3"
         >
           <p className="text-xs uppercase tracking-[0.3em] text-slate-500">
-            Referral Actions (Min $100)
+            Referral Actions (Transfer min $100, Withdrawal min $10)
           </p>
           <div className="grid gap-3 md:grid-cols-2">
             <select
@@ -182,11 +193,11 @@ export default function Referrals() {
             </select>
             <input
               type="number"
-              min="100"
+              min={actionType === "transfer" ? "100" : "10"}
               step="0.01"
               value={amount}
               onChange={(event) => setAmount(event.target.value)}
-              placeholder="Amount (minimum 100)"
+              placeholder={actionType === "transfer" ? "Amount (minimum 100)" : "Amount (minimum 10)"}
               className="rounded-lg border border-white/10 bg-[#0b0c0d] px-3 py-2 text-sm text-slate-200 placeholder:text-slate-500 focus:outline-none"
             />
           </div>
@@ -210,7 +221,9 @@ export default function Referrals() {
           )}
           {!canAction && (
               <p className="text-sm text-amber-300">
-              You need at least $100 in referral earnings before transfer or withdrawal.
+              {actionType === "transfer"
+                ? "You need at least $100 in referral earnings before transfer."
+                : "You need at least $10 in referral earnings before withdrawal."}
             </p>
           )}
           {actionError && <p className="text-sm text-rose-400">{actionError}</p>}

@@ -7,7 +7,7 @@ import {
   sendUserEventNotification,
 } from "../utils/mailer.js";
 
-const ROI_WITHDRAWAL_MIN = 100;
+const ROI_WITHDRAWAL_MIN = 10;
 const ROI_WITHDRAWAL_INTERVAL_DAYS = 10;
 const ROI_WITHDRAWALS_PER_MONTH = 3;
 

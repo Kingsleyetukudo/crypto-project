@@ -39,8 +39,8 @@ export default function Withdraw() {
       setError("Enter a valid amount.");
       return;
     }
-    if (Number(amount) < 100) {
-      setError("Minimum withdrawal amount is $100.");
+    if (Number(amount) < 10) {
+      setError("Minimum withdrawal amount is $10.");
       return;
     }
     if (!destinationAddress.trim()) {
@@ -75,7 +75,7 @@ export default function Withdraw() {
       <div>
         <h2 className="text-2xl font-semibold text-white">Withdraw</h2>
         <p className="text-sm text-slate-400">
-          Request a withdrawal to your wallet address. Minimum withdrawal is $100.
+          Request a withdrawal to your wallet address. Minimum withdrawal is $10.
         </p>
       </div>
 
@@ -91,7 +91,7 @@ export default function Withdraw() {
             value={amount}
             onChange={(event) => setAmount(event.target.value)}
             type="number"
-            min="100"
+            min="10"
             placeholder="Enter amount"
             className="mt-2 w-full rounded-xl border border-white/10 bg-[#0b0c0d] px-4 py-3 text-sm text-white focus:outline-none"
           />
