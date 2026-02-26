@@ -644,9 +644,12 @@ export default function UserDashboard() {
             Hello {profile?.firstName || "there"}, you need to secure your
             account with 2 factor authentication.
           </p>
-          <button className="mt-6 w-full rounded-full bg-amber-400 px-4 py-3 text-sm font-semibold text-slate-950 hover:bg-amber-300">
+          <Link
+            to="/kyc"
+            className="mt-6 block w-full rounded-full bg-amber-400 px-4 py-3 text-center text-sm font-semibold text-slate-950 hover:bg-amber-300"
+          >
             Secure Now
-          </button>
+          </Link>
         </div>
 
         <div className="rounded-3xl border border-white/10 bg-gradient-to-b from-[#1b1d22] to-[#14161a] p-6">

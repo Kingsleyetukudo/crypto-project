@@ -18,6 +18,8 @@ const investmentSchema = new mongoose.Schema(
     endDate: { type: Date, required: true },
     totalInterestAccrued: { type: Number, default: 0 },
     totalInterestWithdrawn: { type: Number, default: 0 },
+    principalReturnedAt: { type: Date },
+    completionNotifiedAt: { type: Date },
     lastInterestAccrualAt: { type: Date },
     lastInterestWithdrawalAt: { type: Date },
     referralCountAtLastWithdrawal: { type: Number, default: 0 },
