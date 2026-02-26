@@ -29,6 +29,13 @@ const userSchema = new mongoose.Schema(
     balance: { type: Number, default: 0 },
     country: { type: String },
     currency: { type: String },
+    kycStatus: {
+      type: String,
+      enum: ["not_submitted", "pending", "approved", "rejected"],
+      default: "not_submitted",
+    },
+    kycReviewedAt: { type: Date },
+    kycRejectionNote: { type: String, default: "" },
     resetOtpHash: { type: String },
     resetOtpExpiresAt: { type: Date },
   },

@@ -22,6 +22,10 @@ import {
   updateInvestmentPlan,
   updateTransaction,
 } from "../controllers/adminController.js";
+import {
+  getPendingKycSubmissions,
+  reviewKycSubmission,
+} from "../controllers/kycController.js";
 
 const router = express.Router();
 
@@ -48,5 +52,7 @@ router.delete("/investment-plans/:id", protect, adminOnly, deleteInvestmentPlan)
 router.get("/user-investments", protect, adminOnly, withPagination(), getUserInvestments);
 router.get("/users", protect, adminOnly, withPagination(), getUsers);
 router.get("/history", protect, adminOnly, withPagination(), getAdminHistory);
+router.get("/kyc/pending", protect, adminOnly, getPendingKycSubmissions);
+router.patch("/kyc/:id", protect, adminOnly, reviewKycSubmission);
 
 export default router;

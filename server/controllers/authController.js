@@ -270,6 +270,9 @@ export const register = async (req, res) => {
         referralEarnings: user.referralEarnings,
         referredBy: user.referredBy,
         referralBalance: user.referralBalance,
+        kycStatus: user.kycStatus,
+        kycReviewedAt: user.kycReviewedAt,
+        kycRejectionNote: user.kycRejectionNote,
       },
     });
   } catch (error) {
@@ -308,6 +311,9 @@ export const login = async (req, res) => {
         referralCode: user.referralCode,
         referralEarnings: user.referralEarnings,
         referralBalance: user.referralBalance,
+        kycStatus: user.kycStatus,
+        kycReviewedAt: user.kycReviewedAt,
+        kycRejectionNote: user.kycRejectionNote,
       },
     });
   } catch (error) {
@@ -479,6 +485,9 @@ export const getProfile = async (req, res) => {
       referralEarnings: user.referralEarnings,
       referredBy: user.referredBy,
       referralBalance: user.referralBalance,
+      kycStatus: user.kycStatus,
+      kycReviewedAt: user.kycReviewedAt,
+      kycRejectionNote: user.kycRejectionNote,
       activeInvestments,
       totalProfit,
       totalDeposits,
@@ -535,6 +544,9 @@ export const updateProfile = async (req, res) => {
       referralCode: user.referralCode,
       referralEarnings: user.referralEarnings,
       referralBalance: user.referralBalance,
+      kycStatus: user.kycStatus,
+      kycReviewedAt: user.kycReviewedAt,
+      kycRejectionNote: user.kycRejectionNote,
     });
   } catch (error) {
     return res.status(500).json({ message: "Failed to update profile" });
